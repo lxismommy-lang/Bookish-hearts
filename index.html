@@ -1,4 +1,116 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#211425">
+<title>Bookish Hearts</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#1d1425;color:#fff0f5;font-family:Arial,sans-serif}
+header{text-align:center;background:#432841;padding:22px 12px}
+h1{color:#ff91bd;font-size:28px;margin:0}
+p{line-height:1.5}
+main{max-width:650px;margin:auto;padding:14px}
+.panel{background:#35263d;border:1px solid #674967;border-radius:16px;padding:17px;margin-bottom:14px}
+.hero{background:linear-gradient(120deg,#633858,#34283e)}
+.muted{font-size:12px;color:#e0c5d8}
+.stats{display:flex;justify-content:space-around;text-align:center;margin:18px 0}
+.stats strong{font-size:23px;color:#ffa9ce;display:block}
+.stats small{font-size:11px}
+.bar{height:9px;background:#24192b;border-radius:20px;overflow:hidden}
+#bar{height:100%;background:#ff92ae;width:0}
+nav{display:flex;gap:6px;overflow-x:auto;margin-bottom:15px}
+button{border:0;border-radius:10px;padding:11px;font-weight:bold;cursor:pointer;font-size:13px}
+nav button{background:#45304a;color:white;white-space:nowrap}
+nav button.active,.pink{background:#ff93bc;color:#301a2b}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{background:#382740;border:1px solid #755378;border-radius:14px;padding:15px;text-align:center;min-width:0}
+.art{font-size:45px;margin-bottom:9px}
+.card strong{display:block;overflow-wrap:anywhere}
+.card small{display:block;font-size:11px;color:#d9bfd4;margin:7px 0;overflow-wrap:anywhere}
+input,select{display:block;width:100%;padding:12px;background:#211829;color:white;border:1px solid #856083;border-radius:9px;margin:7px 0 13px;font-size:15px}
+label{font-size:13px}
+h2{font-size:19px}
+.full{width:100%}
+footer{text-align:center;padding:20px;font-size:11px;color:#bfa8c3}
+</style>
+</head>
+<body>
+<header><h1>📚 Bookish Hearts 💖</h1><p>Read it. Collect it. Love it.</p></header>
+<main>
+<section class="panel hero">
+<div class="muted">✨ YOUR BOOKISH JOURNEY</div>
+<h2 id="level">Level 1 · Bookish Beginner</h2>
+<div class="stats"><div><strong id="books">0</strong><small>Books</small></div><div><strong id="hearts">0</strong><small>Hearts ♥</small></div><div><strong id="series">0</strong><small>Series</small></div></div>
+<div class="muted" id="xp">0 / 5 XP</div><div class="bar"><div id="bar"></div></div>
+</section>
+<nav><button data-tab="read" class="active">📖 Read</button><button data-tab="albums">🥀 Albums</button><button data-tab="series">👑 Series</button><button data-tab="shop">🛍️ Shop</button></nav>
+<div id="screen"></div>
+</main>
+<footer>Bookish Hearts ♡ Your stories, your treasures.</footer>
+<script>
+const genres={"Dark Romance":"🥀","Romantic Comedy":"💕","Fantasy":"🐉","Horror":"👻","Thriller":"🕷️","Mystery":"🗝️","Romance":"🌹","Science Fiction":"🪐","Contemporary":"☕","Nonfiction":"📚"};
+const treasures=[["rose","Midnight Rose","🥀",25],["ghost","Ghost Reader","👻",35],["dragon","Golden Dragon","🐉",75],["shelf","Haunted Shelf","🏚️",100],["queen","Queen of Nightmares","👑",150]];
+let data={list:[],spent:0,owned:[]};
+try{let saved=JSON.parse(localStorage.getItem("bookish-hearts-live"));if(saved&&Array.isArray(saved.list)&&Array.isArray(saved.owned))data=saved}catch(e){}
+let tab="read";
+const el=id=>document.getElementById(id);
+const safe=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function seriesData(){
+let m={};
+data.list.forEach(b=>{if(!b.series)return;let k=b.series.trim().toLowerCase();if(!m[k])m[k]={name:b.series,total:b.total||0,books:[]};m[k].books.push(b);m[k].total=Math.max(m[k].total,b.total||0)});
+return Object.values(m);
+}
+function done(){return seriesData().filter(s=>s.total>0&&new Set(s.books.map(b=>b.title.toLowerCase())).size>=s.total)}
+function xp(){return data.list.length+done().length*5}
+function wallet(){return Math.max(0,xp()-data.spent)}
+function save(){localStorage.setItem("bookish-hearts-live",JSON.stringify(data));render()}
+function render(){
+let points=xp(),level=Math.floor(points/5)+1;
+let labels=["Bookish Beginner","Page Turner","Heart Collector","Sticker Hunter","Book Dragon","Bookish Royalty"];
+el("level").textContent="Level "+level+" · "+labels[Math.min(level-1,5)];
+el("books").textContent=data.list.length;el("hearts").textContent=wallet();el("series").textContent=done().length;
+el("xp").textContent=(points%5)+" / 5 XP to next level";
+el("bar").style.width=((points%5)*20)+"%";
+document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+let html="";
+if(tab==="read"){
+html='<section class="panel"><h2>💖 Collect a Book Sticker</h2><p class="muted">Every finished book earns one heart and a sticker.</p><form id="add"><label>Book title<input name="title" required maxlength="100" placeholder="Your finished book"></label><label>Author<input name="author" maxlength="100" placeholder="Author"></label><label>Genre<select name="genre">'+Object.keys(genres).map(g=>'<option>'+g+'</option>').join("")+'</select></label><label>Series name (optional)<input name="series" maxlength="100" placeholder="Series title"></label><label>Total books in series<input name="total" type="number" min="1" max="100" placeholder="Example: 3"></label><button class="pink full">💗 Earn My Sticker</button></form></section><h2>My Book Stickers</h2>';
+html+=data.list.length?'<div class="grid">'+data.list.map(b=>'<div class="card"><div class="art">'+genres[b.genre]+'</div><strong>'+safe(b.title)+'</strong><small>'+safe(b.author)+'</small><small>+1 ♥</small></div>').join("")+'</div>':'<div class="panel muted">Your sticker album is waiting for its first book!</div>';
+}
+if(tab==="albums"){
+html='<h2>🥀 Genre Collections</h2><div class="grid">'+Object.entries(genres).map(([g,icon])=>'<div class="card"><div class="art">'+icon+'</div><strong>'+g+'</strong><small>'+data.list.filter(b=>b.genre===g).length+' stickers</small></div>').join("")+'</div>';
+}
+if(tab==="series"){
+html='<h2>👑 Legendary Series</h2><p class="muted">Finish a complete series to earn 5 bonus hearts and a legendary reward!</p>';
+html+=seriesData().length?seriesData().map(s=>{let count=new Set(s.books.map(b=>b.title.toLowerCase())).size;let complete=s.total>0&&count>=s.total;return '<div class="panel"><strong>'+safe(s.name)+'</strong><p class="muted">'+count+' / '+(s.total||"?")+' books finished</p><p>'+(complete?'👑 Legendary Sticker Unlocked!':'🔒 Keep reading to unlock the crown')+'</p></div>'}).join(""):'<div class="panel muted">Add a series name while logging your books to start collecting.</div>';
+}
+if(tab==="shop"){
+html='<h2>🛍️ The Heart Shop</h2><div class="panel">💗 Available hearts: <strong>'+wallet()+'</strong><p class="muted">Spend free reading hearts on special rewards. Real-money purchases are not enabled yet.</p></div><div class="grid">'+treasures.map(t=>{let owned=data.owned.includes(t[0]);return '<div class="card"><div class="art">'+t[2]+'</div><strong>'+t[1]+'</strong><small>Exclusive collectible</small><button class="pink full" data-buy="'+t[0]+'" '+(owned||wallet()<t[3]?'disabled':'')+'>'+(owned?'✓ Owned':t[3]+' ♥ Unlock')+'</button></div>'}).join("")+'</div>';
+}
+el("screen").innerHTML=html;
+}
+document.addEventListener("click",e=>{
+let b=e.target.closest("button");if(!b)return;
+if(b.dataset.tab){tab=b.dataset.tab;render()}
+if(b.dataset.buy){let item=treasures.find(t=>t[0]===b.dataset.buy);if(!item||data.owned.includes(item[0])||wallet()<item[3])return;data.spent+=item[3];data.owned.push(item[0]);save();alert("✨ "+item[1]+" unlocked!")}
+});
+document.addEventListener("submit",e=>{
+if(e.target.id!=="add")return;e.preventDefault();
+let f=new FormData(e.target),title=String(f.get("title")||"").trim(),author=String(f.get("author")||"").trim(),series=String(f.get("series")||"").trim(),total=Number(f.get("total"))||0;
+if(!title)return;
+if(series&&!total){alert("Please enter how many books are in the series.");return}
+if(data.list.some(b=>b.title.toLowerCase()===title.toLowerCase()&&b.author.toLowerCase()===author.toLowerCase())){alert("You already collected this book.");return}
+let before=done().length;
+data.list.push({title,author,genre:String(f.get("genre")),series,total});
+let bonus=done().length>before;save();
+alert(bonus?"👑 Series complete! You earned a legendary sticker and 5 bonus hearts!":"💖 Sticker collected! +1 heart!");
+});
+render();
+</script>
+</body>
+</html>
 <!DOCTYPE html>
 <html lang="en">
 <head>
