@@ -1,23 +1,216 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#211325">
 <title>Bookish Hearts</title>
 <style>
-body{background:#1b1022;color:#fff0f5;font-family:Arial,sans-serif;text-align:center;padding:45px 15px}
-h1{color:#ff83b3}
-.card{background:#382440;border-radius:18px;padding:25px;margin:20px auto;max-width:350px}
+*{box-sizing:border-box}
+body{margin:0;background:#1c1223;color:#fff1f5;font-family:Arial,sans-serif}
+header{padding:23px 18px;text-align:center;background:#39203c}
+h1{color:#ff94be;margin:0;font-size:29px}
+header p{color:#e2bed0;font-size:13px}
+main{max-width:650px;margin:auto;padding:15px}
+.panel{background:#35243c;border:1px solid #664665;border-radius:17px;padding:17px;margin-bottom:14px}
+.hero{background:linear-gradient(135deg,#67375b,#382642)}
+h2{font-size:19px;margin:0 0 12px}
+h3{font-size:15px;margin:5px 0}
+.small{font-size:12px;color:#dfc5d7}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin:16px 0}
+.stat{background:#211728;padding:12px 5px;border-radius:10px}
+.stat strong{display:block;font-size:23px;color:#ffaece}
+.stat small{font-size:10px}
+.bar{height:10px;background:#211728;border-radius:20px;overflow:hidden}
+#fill{height:100%;width:0;background:linear-gradient(90deg,#ffa56d,#ff76af)}
+button{cursor:pointer;border:0;border-radius:10px;padding:11px 14px;font-weight:bold;font-size:13px}
+.primary{background:linear-gradient(90deg,#ffa672,#ff80b5);color:#321a2a}
+.secondary{background:#523651;color:#ffe7f0}
+.wide{width:100%;margin-top:13px}
+nav{display:flex;gap:6px;overflow-x:auto;margin:14px 0}
+nav button{white-space:nowrap;background:#35243c;color:white}
+nav button.active{background:#ff8eb9;color:#30192e}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{background:#35243c;border:1px solid #65496c;border-radius:14px;padding:13px;text-align:center;min-width:0}
+.emoji{font-size:48px;margin:9px 0}
+.card strong{display:block;font-size:13px;overflow-wrap:anywhere}
+.card small{font-size:11px;color:#d1b9d3;overflow-wrap:anywhere}
+.card button{margin-top:11px;width:100%}
+label{display:block;font-size:13px;margin:13px 0}
+input,select{display:block;width:100%;padding:12px;margin-top:5px;background:#211728;border:1px solid #775777;border-radius:9px;color:white;font-size:15px}
+form{margin-top:10px}
+.message{padding:13px;border-radius:12px;background:#604057;margin:12px 0;font-size:13px}
+footer{text-align:center;font-size:11px;color:#bca6be;padding:20px}
 </style>
 </head>
 <body>
+<header>
 <h1>📚 Bookish Hearts 💖</h1>
 <p>Read it. Collect it. Love it.</p>
-<div class="card">
-<h2>Welcome, Book Lover!</h2>
-<p>Collect stickers, earn hearts, complete book series, and unlock magical rewards!</p>
-<p>🥀 🐉 👑 💕</p>
-<p>Our bookish adventure begins here!</p>
+</header>
+<main>
+<section class="panel hero">
+<div class="small">✨ YOUR READING ADVENTURE</div>
+<h2 id="level">Level 1 · Bookish Beginner</h2>
+<div class="stats">
+<div class="stat"><strong id="bookCount">0</strong><small>Books</small></div>
+<div class="stat"><strong id="heartCount">0</strong><small>Hearts ♥</small></div>
+<div class="stat"><strong id="seriesCount">0</strong><small>Series</small></div>
 </div>
+<div class="small" id="progress">0 / 5 XP to next level</div>
+<div class="bar"><div id="fill"></div></div>
+</section>
+<nav>
+<button class="active" data-tab="books">📚 Books</button>
+<button data-tab="albums">🥀 Albums</button>
+<button data-tab="series">👑 Series</button>
+<button data-tab="shop">💗 Shop</button>
+</nav>
+<div id="content"></div>
+</main>
+<footer>Bookish Hearts ♡ Made for book lovers</footer>
+<script>
+const genres={
+"Dark Romance":"🥀",
+"Romantic Comedy":"💕",
+"Fantasy":"🐉",
+"Horror":"👻",
+"Thriller":"🕷️",
+"Mystery":"🗝️",
+"Romance":"🌹",
+"Science Fiction":"🪐",
+"Contemporary":"☕",
+"Nonfiction":"📖"
+};
+const rewards=[
+{id:"rose",name:"Midnight Rose",icon:"🥀",cost:25},
+{id:"ghost",name:"Ghost Reader",icon:"👻",cost:35},
+{id:"dragon",name:"Golden Dragon",icon:"🐉",cost:75},
+{id:"shelf",name:"Haunted Shelf",icon:"🏚️",cost:100},
+{id:"queen",name:"Queen of Nightmares",icon:"👑",cost:150},
+{id:"raven",name:"Raven Queen",icon:"🖤",cost:110}
+];
+const $=id=>document.getElementById(id);
+const escapeHTML=s=>String(s||"").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",
+'"':"&quot;","'":"&#39;"
+}[c]));
+let state={books:[],spent:0,owned:[]};
+try{
+const saved=JSON.parse(localStorage.getItem("bookishV2"));
+if(saved&&Array.isArray(saved.books)&&Array.isArray(saved.owned)){
+state={books:saved.books,spent:Number(saved.spent)||0,owned:saved.owned};
+}
+}catch(e){}
+let tab="books";
+function save(){
+localStorage.setItem("bookishV2",JSON.stringify(state));
+render();
+}
+function groups(){
+const map={};
+for(const book of state.books){
+const key=(book.series||"").trim().toLowerCase();
+if(!key)continue;
+if(!map[key])map[key]={name:book.series,total:Number(book.total)||0,books:[]};
+map[key].books.push(book);
+map[key].total=Math.max(map[key].total,Number(book.total)||0);
+}
+return Object.values(map);
+}
+function completed(){
+return groups().filter(s=>s.total>0&&new Set(s.books.map(b=>b.title.trim().toLowerCase())).size>=s.total);
+}
+function xp(){
+return state.books.length+completed().length*5;
+}
+function balance(){
+return Math.max(0,xp()-state.spent);
+}
+function render(){
+const score=xp(),lvl=1+Math.floor(score/5);
+const names=["Bookish Beginner","Page Turner","Heart Collector","Sticker Hunter","Book Dragon","Bookish Royalty"];
+$("level").textContent="Level "+lvl+" · "+(names[Math.min(lvl-1,names.length-1)]);
+$("bookCount").textContent=state.books.length;
+$("heartCount").textContent=balance();
+$("seriesCount").textContent=completed().length;
+$("progress").textContent=(score%5)+" / 5 XP to next level";
+$("fill").style.width=((score%5)*20)+"%";
+document.querySelectorAll("[data-tab]").forEach(b=>{
+b.classList.toggle("active",b.dataset.tab===tab);
+});
+let html="";
+if(tab==="books"){
+html='<div class="panel"><h2>💖 Finish a book</h2><p class="small">Earn a sticker, 1 heart, and 1 XP for every finished book.</p><form id="bookForm"><label>Book title<input name="title" maxlength="120" required placeholder="Book title"></label><label>Author<input name="author" maxlength="100" placeholder="Author name"></label><label>Genre<select name="genre">'+Object.keys(genres).map(g=>'<option>'+g+'</option>').join("")+'</select></label><label>Series name (optional)<input name="series" maxlength="120" placeholder="Example: My Favorite Series"></label><label>Total books in series<input name="total" type="number" min="1" max="100" placeholder="Example: 3"></label><button class="primary wide">💗 Collect My Sticker</button></form></div><h2>📖 My Finished Books</h2>';
+html+=state.books.length?'<div class="grid">'+state.books.map(b=>'<div class="card"><div class="emoji">'+genres[b.genre]+'</div><strong>'+escapeHTML(b.title)+'</strong><small>'+escapeHTML(b.author)+'</small><p class="small">+1 ♥</p></div>').join("")+'</div>':'<div class="panel small">Your collection is waiting! Add your first finished book.</div>';
+}
+if(tab==="albums"){
+html="<h2>🥀 Genre Sticker Albums</h2><div class='grid'>";
+for(const [genre,icon] of Object.entries(genres)){
+const count=state.books.filter(b=>b.genre===genre).length;
+html+='<div class="card"><div class="emoji">'+icon+'</div><strong>'+genre+'</strong><small>'+count+' stickers collected</small></div>';
+}
+html+="</div>";
+}
+if(tab==="series"){
+html="<h2>👑 Series Collections</h2><p class='small'>Finish every book in a series for 5 bonus hearts, 5 XP, and a legendary badge!</p>";
+const all=groups();
+html+=all.length?all.map(s=>{
+const unique=new Set(s.books.map(b=>b.title.trim().toLowerCase())).size;
+const done=s.total>0&&unique>=s.total;
+return '<div class="panel"><h3>'+escapeHTML(s.name)+'</h3><p class="small">'+unique+' of '+(s.total||"?")+' books finished</p><div class="bar"><div class="fill" style="height:100%;width:'+Math.min(100,s.total?unique/s.total*100:0)+'%;background:#ff87b5"></div></div><p>'+ (done?"👑 Legendary Series Sticker Unlocked! +5 ♥":"🔒 Finish the series to unlock your crown")+'</p></div>';
+}).join(""):'<div class="panel small">Add a series name when logging books to start a collection.</div>';
+}
+if(tab==="shop"){
+html='<h2>🛍️ The Heart Shop</h2><div class="panel"><strong>💗 Your wallet: '+balance()+' hearts</strong><p class="small">Earn hearts by reading. Paid heart packs will be added after secure checkout is connected.</p></div><div class="grid">';
+for(const item of rewards){
+const owned=state.owned.includes(item.id);
+html+='<div class="card"><div class="emoji">'+item.icon+'</div><strong>'+item.name+'</strong><small>Exclusive collectible</small><button class="primary" data-buy="'+item.id+'" '+(owned||balance()<item.cost?"disabled":"")+'>'+(owned?"✓ Unlocked":item.cost+" ♥ Unlock")+'</button></div>';
+}
+html+='</div>';
+}
+$("content").innerHTML=html;
+}
+document.addEventListener("click",e=>{
+const button=e.target.closest("button");
+if(!button)return;
+if(button.dataset.tab){
+tab=button.dataset.tab;render();
+}
+if(button.dataset.buy){
+const item=rewards.find(x=>x.id===button.dataset.buy);
+if(!item||state.owned.includes(item.id)||balance()<item.cost)return;
+state.spent+=item.cost;
+state.owned.push(item.id);
+save();
+alert("✨ "+item.name+" unlocked!");
+}
+});
+document.addEventListener("submit",e=>{
+if(e.target.id!=="bookForm")return;
+e.preventDefault();
+const f=new FormData(e.target);
+const title=String(f.get("title")||"").trim();
+const series=String(f.get("series")||"").trim();
+const total=Number(f.get("total"))||0;
+if(!title)return;
+if(series&&!total){alert("Enter the total number of books in this series.");return;}
+if(state.books.some(b=>b.title.toLowerCase()===title.toLowerCase()&&b.author.toLowerCase()===String(f.get("author")||"").trim().toLowerCase())){
+alert("This book is already in your collection.");return;
+}
+const before=completed().length;
+state.books.push({
+title,author:String(f.get("author")||"").trim(),
+genre:String(f.get("genre")),
+series,total
+});
+const bonus=completed().length>before;
+save();
+alert(bonus?"👑 SERIES COMPLETE! Legendary sticker and 5 bonus hearts unlocked!":"💖 New book sticker collected! +1 heart!");
+});
+render();
+</script>
 </body>
 </html>
+
