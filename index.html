@@ -57,8 +57,42 @@ c.append(node('h2','👑 Series Collections'));let all=groups();if(!all.length)c
 c.append(node('h2','🛍️ The Heart Shop'),node('p','You have '+balance()+' hearts. These are free in-app rewards.','panel'));let grid=node('div',undefined,'grid');rewards.forEach(([id,name,emoji,cost])=>{let card=node('div',undefined,'card');card.append(node('div',emoji,'emoji'),node('strong',name));let btn=node('button',state.owned.includes(id)?'✓ Owned':cost+' ♥ Unlock');btn.disabled=state.owned.includes(id)||balance()<cost;btn.onclick=()=>{state.spent+=cost;state.owned.push(id);store()};card.append(btn);grid.append(card)});c.append(grid)}
 }
 function bookCard(book,collected){let card=node('div',undefined,'card sticker');let img=node('img');img.className='cover';img.alt='Cover of '+book.title;img.loading='lazy';if(book.cover)img.src=book.cover;let btn=node('button',collected?'Remove sticker':'Collect 💕');btn.disabled=!collected&&stickers.some(x=>x.id===book.id);if(btn.disabled)btn.textContent='Collected 💖';btn.onclick=()=>{if(collected)stickers=stickers.filter(x=>x.id!==book.id);else if(!stickers.some(x=>x.id===book.id))stickers.push(book);storeStickers();if(!collected&&tab==='find')btn.textContent='Collected 💖'};card.append(img,node('strong',book.title),node('small',book.author||'Unknown author'),btn);return card}
-async function searchBooks(){const q=$('bookQuery').value.trim();if(!q)return;const msg=$('bookMessage'),results=$('bookResults');msg.textContent='Searching books...';results.replaceChildren();try{const response=await fetch('https://www.googleapis.com/books/v1/volumes?q='+encodeURIComponent(q)+'&maxResults=20');if(!response.ok)throw Error('Google Books returned '+response.status);const json=await response.json();const books=(json.items||[]).map(x=>({id:x.id,title:x.volumeInfo?.title||'Untitled',author:(x.volumeInfo?.authors||[]).join(', '),cover:(x.volumeInfo?.imageLinks?.thumbnail||'').replace(/^http:/,'https:')}));msg.textContent=books.length?'Tap Collect to save a book-cover sticker!':'No books found. Try another title or author.';books.forEach(b=>results.append(bookCard(b,false)))}catch(e){console.error(e);msg.textContent='Could not load books. Check your connection and try again.'}}
-document.addEventListener('submit',e=>{if(e.target.id==='searchForm'){e.preventDefault();searchBooks();return}if(e.target.id==='bookForm'){e.preventDefault();let f=new FormData(e.target),title=String(f.get('title')||'').trim();if(!title)return;let author=String(f.get('author')||'').trim();if(state.books.some(b=>b.title.toLowerCase()===title.toLowerCase()&&(b.author||'').toLowerCase()===author.toLowerCase())){alert('This book is already collected!');return}let series=String(f.get('series')||'').trim(),total=Number(f.get('total'))||0;if(series&&!total){alert('Enter the total number of books in this series.');return}state.books.push({title,author,series,total,genre:String(f.get('genre'))});store();alert('💖 Book collected! +1 heart')}});
+
+async function searchBooks() {
+  const q = $('bookQuery').value.trim();
+  if (!q) return;
+  const msg = $('bookMessage');
+  const results = $('bookResults');
+  msg.textContent = 'Searching books...';
+  results.replaceChildren();
+
+  try {
+    const url = 'https://openlibrary.org/search.json?q=' +
+      encodeURIComponent(q) + '&limit=20';
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Search failed');
+
+    const data = await response.json();
+    const books = (data.docs || []).map(b => ({
+      id: b.key,
+      title: b.title || 'Untitled',
+      author: (b.author_name || []).join(', '),
+      cover: b.cover_i
+        ? 'https://covers.openlibrary.org/b/id/' + b.cover_i + '-M.jpg'
+        : ''
+    }));
+
+    msg.textContent = books.length
+      ? 'Tap Collect to save your book-cover stickers!'
+      : 'No books found. Try another title.';
+
+    books.forEach(b => results.append(bookCard(b, false)));
+  } catch (e) {
+    console.error(e);
+    msg.textContent = 'Could not load books. Please try again.';
+  }
+}
+
 document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tab;render()}));
 let db=null;try{if(window.supabase)db=window.supabase.createClient('https://etiuirndinazjmakkuca.supabase.co','sb_publishable_TB5LEM-OVQhU6Pf4bsZcEw_6zMpFyUD')}catch(e){console.error('Authentication setup:',e)}
 $('authOpen').onclick=async()=>{if(db){try{let {data}=await db.auth.getUser();if(data?.user){if(confirm('Sign out of Bookish Hearts?'))await db.auth.signOut();return}}catch(e){console.error(e)}}$('authModal').style.display='flex'};
