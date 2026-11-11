@@ -436,6 +436,92 @@ alert(bonus?"👑 SERIES COMPLETE! Legendary sticker and 5 bonus hearts unlocked
 render();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-</body>
+<
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(() => {
+  const db = window.supabase.createClient(
+    "https://etiuirndinazjmakkuca.supabase.co",
+    "sb_publishable_TB5LEM-OVQhU6Pf4bsZcEw_6zMpFyUD"
+  );
+
+  const panel = document.createElement("div");
+  panel.innerHTML = `
+    <button id="bhOpen" style="position:fixed;top:12px;right:12px;z-index:9999;background:#ec4899;color:white;padding:12px;border:0;border-radius:20px">
+      Sign In / Sign Up
+    </button>
+    <div id="bhBox" style="display:none;position:fixed;inset:0;background:#0009;z-index:10000;align-items:center;justify-content:center">
+      <div style="background:white;padding:25px;border-radius:18px;width:90%;max-width:350px;color:#333">
+        <h2>💕 Bookish Hearts</h2>
+        <input id="bhEmail" type="email" placeholder="Email" style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box">
+        <input id="bhPass" type="password" placeholder="Password" style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box">
+        <button id="bhSignIn">Sign In</button>
+        <button id="bhSignUp">Sign Up</button>
+        <button id="bhClose">Close</button>
+        <p id="bhMessage"></p>
+      </div>
+    </div>`;
+  document.body.appendChild(panel);
+
+  const get = id => document.getElementById(id);
+  const message = text => get("bhMessage").textContent = text;
+
+  get("bhOpen").onclick = async () => {
+    const {data, error} = await db.auth.getUser();
+    if (error && !data?.user) {
+      get("bhBox").style.display = "flex";
+      return;
+    }
+    if (data.user) {
+      if (confirm("Sign out of Bookish Hearts?")) {
+        await db.auth.signOut();
+        get("bhOpen").textContent = "Sign In / Sign Up";
+      }
+    } else {
+      get("bhBox").style.display = "flex";
+    }
+  };
+
+  get("bhClose").onclick = () => {
+    get("bhBox").style.display = "none";
+  };
+
+  async function authenticate(signUp) {
+    const email = get("bhEmail").value.trim();
+    const password = get("bhPass").value;
+
+    if (!email || !password) {
+      message("Enter your email and password.");
+      return;
+    }
+
+    message("Please wait...");
+
+    const result = signUp
+      ? await db.auth.signUp({email,password})
+      : await db.auth.signInWithPassword({email,password});
+
+    if (result.error) {
+      message(result.error.message);
+    } else if (signUp && !result.data.session) {
+      message("Check your email to confirm your account!");
+    } else {
+      message("Welcome to Bookish Hearts!");
+      get("bhBox").style.display = "none";
+    }
+  }
+
+  get("bhSignIn").onclick = () => authenticate(false);
+  get("bhSignUp").onclick = () => authenticate(true);
+
+  db.auth.onAuthStateChange((_event, session) => {
+    get("bhOpen").textContent = session
+      ? "Sign Out"
+      : "Sign In / Sign Up";
+  });
+})();
+</script>
+/body>
+
 </html>
 
