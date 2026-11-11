@@ -1,590 +1,71 @@
-<<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#211425">
-<title>Bookish Hearts</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#211325"><title>Bookish Hearts</title>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#1d1425;color:#fff0f5;font-family:Arial,sans-serif}
-header{text-align:center;background:#432841;padding:22px 12px}
-h1{color:#ff91bd;font-size:28px;margin:0}
-p{line-height:1.5}
-main{max-width:650px;margin:auto;padding:14px}
-.panel{background:#35263d;border:1px solid #674967;border-radius:16px;padding:17px;margin-bottom:14px}
-.hero{background:linear-gradient(120deg,#633858,#34283e)}
-.muted{font-size:12px;color:#e0c5d8}
-.stats{display:flex;justify-content:space-around;text-align:center;margin:18px 0}
-.stats strong{font-size:23px;color:#ffa9ce;display:block}
-.stats small{font-size:11px}
-.bar{height:9px;background:#24192b;border-radius:20px;overflow:hidden}
-#bar{height:100%;background:#ff92ae;width:0}
-nav{display:flex;gap:6px;overflow-x:auto;margin-bottom:15px}
-button{border:0;border-radius:10px;padding:11px;font-weight:bold;cursor:pointer;font-size:13px}
-nav button{background:#45304a;color:white;white-space:nowrap}
-nav button.active,.pink{background:#ff93bc;color:#301a2b}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.card{background:#382740;border:1px solid #755378;border-radius:14px;padding:15px;text-align:center;min-width:0}
-.art{font-size:45px;margin-bottom:9px}
-.card strong{display:block;overflow-wrap:anywhere}
-.card small{display:block;font-size:11px;color:#d9bfd4;margin:7px 0;overflow-wrap:anywhere}
-input,select{display:block;width:100%;padding:12px;background:#211829;color:white;border:1px solid #856083;border-radius:9px;margin:7px 0 13px;font-size:15px}
-label{font-size:13px}
-h2{font-size:19px}
-.full{width:100%}
-footer{text-align:center;padding:20px;font-size:11px;color:#bfa8c3}
-</style>
-</head>
+*{box-sizing:border-box}body{margin:0;background:#1c1223;color:#fff1f5;font-family:Arial,sans-serif}header{text-align:center;padding:22px 15px;background:#39203c}h1{margin:0;color:#ff94be;font-size:29px}header p{font-size:13px;color:#e2bed0}main{max-width:720px;padding:15px;margin:auto}.panel,.card{background:#35243c;border:1px solid #65496c;border-radius:15px;padding:15px;margin-bottom:12px}.hero{background:linear-gradient(135deg,#67375b,#382642)}.small{font-size:12px;color:#e1c4d6}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin:15px 0}.stats div{background:#211728;padding:10px;border-radius:10px}.stats strong{display:block;font-size:23px;color:#ffaece}.stats small{font-size:10px}.bar{height:9px;background:#211728;border-radius:20px;overflow:hidden}.fill{height:100%;width:0;background:#ff87b5}nav{display:flex;gap:6px;overflow-x:auto;margin:15px 0}button{border:0;border-radius:12px;padding:11px 13px;background:#ff91bb;color:#311a2b;font-weight:bold;cursor:pointer}nav button{white-space:nowrap;background:#513451;color:#fff}nav button.active{background:#ff91bb;color:#311a2b}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{text-align:center;min-width:0;overflow-wrap:anywhere}.card strong,.card small{display:block;margin:8px 0}.cover{display:block;margin:0 auto 8px;width:112px;height:165px;object-fit:contain;border-radius:8px;background:#271b30}.emoji{font-size:44px}.wide{width:100%}input,select{width:100%;padding:12px;margin:6px 0 12px;background:#211728;border:1px solid #775777;border-radius:9px;color:white;font-size:15px}label{display:block;margin-top:10px}h2{font-size:19px}footer{text-align:center;padding:18px;color:#bca6be;font-size:11px}#authModal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000b;z-index:20;padding:14px}#authModal .panel{width:100%;max-width:380px;background:#fff4fa;color:#3b1934}#authModal input{background:white;color:#222;border-color:#c7a4c0}.topbar{display:flex;align-items:center;justify-content:flex-end;padding:10px 14px}.searchrow{display:flex;gap:7px}.searchrow input{flex:1;min-width:0;margin:0}.searchrow button{flex-shrink:0}.book-note{margin:10px 0;font-size:13px}.actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}button:disabled{opacity:.55}.sticker{border:4px solid #ffe3f0;transform:rotate(-1deg)}.sticker:nth-child(2n){transform:rotate(2deg)}
+</style></head>
 <body>
 <header><h1>📚 Bookish Hearts 💖</h1><p>Read it. Collect it. Love it.</p></header>
+<div class="topbar"><button id="authOpen">Sign In / Sign Up</button></div>
 <main>
-<section class="panel hero">
-<div class="muted">✨ YOUR BOOKISH JOURNEY</div>
-<h2 id="level">Level 1 · Bookish Beginner</h2>
-<div class="stats"><div><strong id="books">0</strong><small>Books</small></div><div><strong id="hearts">0</strong><small>Hearts ♥</small></div><div><strong id="series">0</strong><small>Series</small></div></div>
-<div class="muted" id="xp">0 / 5 XP</div><div class="bar"><div id="bar"></div></div>
-</section>
-<nav><button data-tab="read" class="active">📖 Read</button><button data-tab="albums">🥀 Albums</button><button data-tab="series">👑 Series</button><button data-tab="shop">🛍️ Shop</button></nav>
-<div id="screen"></div>
-</main>
-<footer>Bookish Hearts ♡ Your stories, your treasures.</footer>
-<script>
-const genres={"Dark Romance":"🥀","Romantic Comedy":"💕","Fantasy":"🐉","Horror":"👻","Thriller":"🕷️","Mystery":"🗝️","Romance":"🌹","Science Fiction":"🪐","Contemporary":"☕","Nonfiction":"📚"};
-const treasures=[["rose","Midnight Rose","🥀",25],["ghost","Ghost Reader","👻",35],["dragon","Golden Dragon","🐉",75],["shelf","Haunted Shelf","🏚️",100],["queen","Queen of Nightmares","👑",150]];
-let data={list:[],spent:0,owned:[]};
-try{let saved=JSON.parse(localStorage.getItem("bookish-hearts-live"));if(saved&&Array.isArray(saved.list)&&Array.isArray(saved.owned))data=saved}catch(e){}
-let tab="read";
-const el=id=>document.getElementById(id);
-const safe=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function seriesData(){
-let m={};
-data.list.forEach(b=>{if(!b.series)return;let k=b.series.trim().toLowerCase();if(!m[k])m[k]={name:b.series,total:b.total||0,books:[]};m[k].books.push(b);m[k].total=Math.max(m[k].total,b.total||0)});
-return Object.values(m);
-}
-function done(){return seriesData().filter(s=>s.total>0&&new Set(s.books.map(b=>b.title.toLowerCase())).size>=s.total)}
-function xp(){return data.list.length+done().length*5}
-function wallet(){return Math.max(0,xp()-data.spent)}
-function save(){localStorage.setItem("bookish-hearts-live",JSON.stringify(data));render()}
-function render(){
-let points=xp(),level=Math.floor(points/5)+1;
-let labels=["Bookish Beginner","Page Turner","Heart Collector","Sticker Hunter","Book Dragon","Bookish Royalty"];
-el("level").textContent="Level "+level+" · "+labels[Math.min(level-1,5)];
-el("books").textContent=data.list.length;el("hearts").textContent=wallet();el("series").textContent=done().length;
-el("xp").textContent=(points%5)+" / 5 XP to next level";
-el("bar").style.width=((points%5)*20)+"%";
-document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
-let html="";
-if(tab==="read"){
-html='<section class="panel"><h2>💖 Collect a Book Sticker</h2><p class="muted">Every finished book earns one heart and a sticker.</p><form id="add"><label>Book title<input name="title" required maxlength="100" placeholder="Your finished book"></label><label>Author<input name="author" maxlength="100" placeholder="Author"></label><label>Genre<select name="genre">'+Object.keys(genres).map(g=>'<option>'+g+'</option>').join("")+'</select></label><label>Series name (optional)<input name="series" maxlength="100" placeholder="Series title"></label><label>Total books in series<input name="total" type="number" min="1" max="100" placeholder="Example: 3"></label><button class="pink full">💗 Earn My Sticker</button></form></section><h2>My Book Stickers</h2>';
-html+=data.list.length?'<div class="grid">'+data.list.map(b=>'<div class="card"><div class="art">'+genres[b.genre]+'</div><strong>'+safe(b.title)+'</strong><small>'+safe(b.author)+'</small><small>+1 ♥</small></div>').join("")+'</div>':'<div class="panel muted">Your sticker album is waiting for its first book!</div>';
-}
-if(tab==="albums"){
-html='<h2>🥀 Genre Collections</h2><div class="grid">'+Object.entries(genres).map(([g,icon])=>'<div class="card"><div class="art">'+icon+'</div><strong>'+g+'</strong><small>'+data.list.filter(b=>b.genre===g).length+' stickers</small></div>').join("")+'</div>';
-}
-if(tab==="series"){
-html='<h2>👑 Legendary Series</h2><p class="muted">Finish a complete series to earn 5 bonus hearts and a legendary reward!</p>';
-html+=seriesData().length?seriesData().map(s=>{let count=new Set(s.books.map(b=>b.title.toLowerCase())).size;let complete=s.total>0&&count>=s.total;return '<div class="panel"><strong>'+safe(s.name)+'</strong><p class="muted">'+count+' / '+(s.total||"?")+' books finished</p><p>'+(complete?'👑 Legendary Sticker Unlocked!':'🔒 Keep reading to unlock the crown')+'</p></div>'}).join(""):'<div class="panel muted">Add a series name while logging your books to start collecting.</div>';
-}
-if(tab==="shop"){
-html='<h2>🛍️ The Heart Shop</h2><div class="panel">💗 Available hearts: <strong>'+wallet()+'</strong><p class="muted">Spend free reading hearts on special rewards. Real-money purchases are not enabled yet.</p></div><div class="grid">'+treasures.map(t=>{let owned=data.owned.includes(t[0]);return '<div class="card"><div class="art">'+t[2]+'</div><strong>'+t[1]+'</strong><small>Exclusive collectible</small><button class="pink full" data-buy="'+t[0]+'" '+(owned||wallet()<t[3]?'disabled':'')+'>'+(owned?'✓ Owned':t[3]+' ♥ Unlock')+'</button></div>'}).join("")+'</div>';
-}
-el("screen").innerHTML=html;
-}
-document.addEventListener("click",e=>{
-let b=e.target.closest("button");if(!b)return;
-if(b.dataset.tab){tab=b.dataset.tab;render()}
-if(b.dataset.buy){let item=treasures.find(t=>t[0]===b.dataset.buy);if(!item||data.owned.includes(item[0])||wallet()<item[3])return;data.spent+=item[3];data.owned.push(item[0]);save();alert("✨ "+item[1]+" unlocked!")}
-});
-document.addEventListener("submit",e=>{
-if(e.target.id!=="add")return;e.preventDefault();
-let f=new FormData(e.target),title=String(f.get("title")||"").trim(),author=String(f.get("author")||"").trim(),series=String(f.get("series")||"").trim(),total=Number(f.get("total"))||0;
-if(!title)return;
-if(series&&!total){alert("Please enter how many books are in the series.");return}
-if(data.list.some(b=>b.title.toLowerCase()===title.toLowerCase()&&b.author.toLowerCase()===author.toLowerCase())){alert("You already collected this book.");return}
-let before=done().length;
-data.list.push({title,author,genre:String(f.get("genre")),series,total});
-let bonus=done().length>before;save();
-alert(bonus?"👑 Series complete! You earned a legendary sticker and 5 bonus hearts!":"💖 Sticker collected! +1 heart!");
-});
-render();
-</script>
-</body>
-</html>!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#211425">
-<title>Bookish Hearts</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#1d1425;color:#fff0f5;font-family:Arial,sans-serif}
-header{text-align:center;background:#432841;padding:22px 12px}
-h1{color:#ff91bd;font-size:28px;margin:0}
-p{line-height:1.5}
-main{max-width:650px;margin:auto;padding:14px}
-.panel{background:#35263d;border:1px solid #674967;border-radius:16px;padding:17px;margin-bottom:14px}
-.hero{background:linear-gradient(120deg,#633858,#34283e)}
-.muted{font-size:12px;color:#e0c5d8}
-.stats{display:flex;justify-content:space-around;text-align:center;margin:18px 0}
-.stats strong{font-size:23px;color:#ffa9ce;display:block}
-.stats small{font-size:11px}
-.bar{height:9px;background:#24192b;border-radius:20px;overflow:hidden}
-#bar{height:100%;background:#ff92ae;width:0}
-nav{display:flex;gap:6px;overflow-x:auto;margin-bottom:15px}
-button{border:0;border-radius:10px;padding:11px;font-weight:bold;cursor:pointer;font-size:13px}
-nav button{background:#45304a;color:white;white-space:nowrap}
-nav button.active,.pink{background:#ff93bc;color:#301a2b}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.card{background:#382740;border:1px solid #755378;border-radius:14px;padding:15px;text-align:center;min-width:0}
-.art{font-size:45px;margin-bottom:9px}
-.card strong{display:block;overflow-wrap:anywhere}
-.card small{display:block;font-size:11px;color:#d9bfd4;margin:7px 0;overflow-wrap:anywhere}
-input,select{display:block;width:100%;padding:12px;background:#211829;color:white;border:1px solid #856083;border-radius:9px;margin:7px 0 13px;font-size:15px}
-label{font-size:13px}
-h2{font-size:19px}
-.full{width:100%}
-footer{text-align:center;padding:20px;font-size:11px;color:#bfa8c3}
-</style>
-</head>
-<body>
-<header><h1>📚 Bookish Hearts 💖</h1><p>Read it. Collect it. Love it.</p></header>
-<main>
-<section class="panel hero">
-<div class="muted">✨ YOUR BOOKISH JOURNEY</div>
-<h2 id="level">Level 1 · Bookish Beginner</h2>
-<div class="stats"><div><strong id="books">0</strong><small>Books</small></div><div><strong id="hearts">0</strong><small>Hearts ♥</small></div><div><strong id="series">0</strong><small>Series</small></div></div>
-<div class="muted" id="xp">0 / 5 XP</div><div class="bar"><div id="bar"></div></div>
-</section>
-<nav><button data-tab="read" class="active">📖 Read</button><button data-tab="albums">🥀 Albums</button><button data-tab="series">👑 Series</button><button data-tab="shop">🛍️ Shop</button></nav>
-<div id="screen"></div>
-</main>
-<footer>Bookish Hearts ♡ Your stories, your treasures.</footer>
-<script>
-const genres={"Dark Romance":"🥀","Romantic Comedy":"💕","Fantasy":"🐉","Horror":"👻","Thriller":"🕷️","Mystery":"🗝️","Romance":"🌹","Science Fiction":"🪐","Contemporary":"☕","Nonfiction":"📚"};
-const treasures=[["rose","Midnight Rose","🥀",25],["ghost","Ghost Reader","👻",35],["dragon","Golden Dragon","🐉",75],["shelf","Haunted Shelf","🏚️",100],["queen","Queen of Nightmares","👑",150]];
-let data={list:[],spent:0,owned:[]};
-try{let saved=JSON.parse(localStorage.getItem("bookish-hearts-live"));if(saved&&Array.isArray(saved.list)&&Array.isArray(saved.owned))data=saved}catch(e){}
-let tab="read";
-const el=id=>document.getElementById(id);
-const safe=s=>String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-function seriesData(){
-let m={};
-data.list.forEach(b=>{if(!b.series)return;let k=b.series.trim().toLowerCase();if(!m[k])m[k]={name:b.series,total:b.total||0,books:[]};m[k].books.push(b);m[k].total=Math.max(m[k].total,b.total||0)});
-return Object.values(m);
-}
-function done(){return seriesData().filter(s=>s.total>0&&new Set(s.books.map(b=>b.title.toLowerCase())).size>=s.total)}
-function xp(){return data.list.length+done().length*5}
-function wallet(){return Math.max(0,xp()-data.spent)}
-function save(){localStorage.setItem("bookish-hearts-live",JSON.stringify(data));render()}
-function render(){
-let points=xp(),level=Math.floor(points/5)+1;
-let labels=["Bookish Beginner","Page Turner","Heart Collector","Sticker Hunter","Book Dragon","Bookish Royalty"];
-el("level").textContent="Level "+level+" · "+labels[Math.min(level-1,5)];
-el("books").textContent=data.list.length;el("hearts").textContent=wallet();el("series").textContent=done().length;
-el("xp").textContent=(points%5)+" / 5 XP to next level";
-el("bar").style.width=((points%5)*20)+"%";
-document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
-let html="";
-if(tab==="read"){
-html='<section class="panel"><h2>💖 Collect a Book Sticker</h2><p class="muted">Every finished book earns one heart and a sticker.</p><form id="add"><label>Book title<input name="title" required maxlength="100" placeholder="Your finished book"></label><label>Author<input name="author" maxlength="100" placeholder="Author"></label><label>Genre<select name="genre">'+Object.keys(genres).map(g=>'<option>'+g+'</option>').join("")+'</select></label><label>Series name (optional)<input name="series" maxlength="100" placeholder="Series title"></label><label>Total books in series<input name="total" type="number" min="1" max="100" placeholder="Example: 3"></label><button class="pink full">💗 Earn My Sticker</button></form></section><h2>My Book Stickers</h2>';
-html+=data.list.length?'<div class="grid">'+data.list.map(b=>'<div class="card"><div class="art">'+genres[b.genre]+'</div><strong>'+safe(b.title)+'</strong><small>'+safe(b.author)+'</small><small>+1 ♥</small></div>').join("")+'</div>':'<div class="panel muted">Your sticker album is waiting for its first book!</div>';
-}
-if(tab==="albums"){
-html='<h2>🥀 Genre Collections</h2><div class="grid">'+Object.entries(genres).map(([g,icon])=>'<div class="card"><div class="art">'+icon+'</div><strong>'+g+'</strong><small>'+data.list.filter(b=>b.genre===g).length+' stickers</small></div>').join("")+'</div>';
-}
-if(tab==="series"){
-html='<h2>👑 Legendary Series</h2><p class="muted">Finish a complete series to earn 5 bonus hearts and a legendary reward!</p>';
-html+=seriesData().length?seriesData().map(s=>{let count=new Set(s.books.map(b=>b.title.toLowerCase())).size;let complete=s.total>0&&count>=s.total;return '<div class="panel"><strong>'+safe(s.name)+'</strong><p class="muted">'+count+' / '+(s.total||"?")+' books finished</p><p>'+(complete?'👑 Legendary Sticker Unlocked!':'🔒 Keep reading to unlock the crown')+'</p></div>'}).join(""):'<div class="panel muted">Add a series name while logging your books to start collecting.</div>';
-}
-if(tab==="shop"){
-html='<h2>🛍️ The Heart Shop</h2><div class="panel">💗 Available hearts: <strong>'+wallet()+'</strong><p class="muted">Spend free reading hearts on special rewards. Real-money purchases are not enabled yet.</p></div><div class="grid">'+treasures.map(t=>{let owned=data.owned.includes(t[0]);return '<div class="card"><div class="art">'+t[2]+'</div><strong>'+t[1]+'</strong><small>Exclusive collectible</small><button class="pink full" data-buy="'+t[0]+'" '+(owned||wallet()<t[3]?'disabled':'')+'>'+(owned?'✓ Owned':t[3]+' ♥ Unlock')+'</button></div>'}).join("")+'</div>';
-}
-el("screen").innerHTML=html;
-}
-document.addEventListener("click",e=>{
-let b=e.target.closest("button");if(!b)return;
-if(b.dataset.tab){tab=b.dataset.tab;render()}
-if(b.dataset.buy){let item=treasures.find(t=>t[0]===b.dataset.buy);if(!item||data.owned.includes(item[0])||wallet()<item[3])return;data.spent+=item[3];data.owned.push(item[0]);save();alert("✨ "+item[1]+" unlocked!")}
-});
-document.addEventListener("submit",e=>{
-if(e.target.id!=="add")return;e.preventDefault();
-let f=new FormData(e.target),title=String(f.get("title")||"").trim(),author=String(f.get("author")||"").trim(),series=String(f.get("series")||"").trim(),total=Number(f.get("total"))||0;
-if(!title)return;
-if(series&&!total){alert("Please enter how many books are in the series.");return}
-if(data.list.some(b=>b.title.toLowerCase()===title.toLowerCase()&&b.author.toLowerCase()===author.toLowerCase())){alert("You already collected this book.");return}
-let before=done().length;
-data.list.push({title,author,genre:String(f.get("genre")),series,total});
-let bonus=done().length>before;save();
-alert(bonus?"👑 Series complete! You earned a legendary sticker and 5 bonus hearts!":"💖 Sticker collected! +1 heart!");
-});
-render();
-</script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#211325">
-<title>Bookish Hearts</title>
-<style>
-*{box-sizing:border-box}
-body{margin:0;background:#1c1223;color:#fff1f5;font-family:Arial,sans-serif}
-header{padding:23px 18px;text-align:center;background:#39203c}
-h1{color:#ff94be;margin:0;font-size:29px}
-header p{color:#e2bed0;font-size:13px}
-main{max-width:650px;margin:auto;padding:15px}
-.panel{background:#35243c;border:1px solid #664665;border-radius:17px;padding:17px;margin-bottom:14px}
-.hero{background:linear-gradient(135deg,#67375b,#382642)}
-h2{font-size:19px;margin:0 0 12px}
-h3{font-size:15px;margin:5px 0}
-.small{font-size:12px;color:#dfc5d7}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin:16px 0}
-.stat{background:#211728;padding:12px 5px;border-radius:10px}
-.stat strong{display:block;font-size:23px;color:#ffaece}
-.stat small{font-size:10px}
-.bar{height:10px;background:#211728;border-radius:20px;overflow:hidden}
-#fill{height:100%;width:0;background:linear-gradient(90deg,#ffa56d,#ff76af)}
-button{cursor:pointer;border:0;border-radius:10px;padding:11px 14px;font-weight:bold;font-size:13px}
-.primary{background:linear-gradient(90deg,#ffa672,#ff80b5);color:#321a2a}
-.secondary{background:#523651;color:#ffe7f0}
-.wide{width:100%;margin-top:13px}
-nav{display:flex;gap:6px;overflow-x:auto;margin:14px 0}
-nav button{white-space:nowrap;background:#35243c;color:white}
-nav button.active{background:#ff8eb9;color:#30192e}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
-.card{background:#35243c;border:1px solid #65496c;border-radius:14px;padding:13px;text-align:center;min-width:0}
-.emoji{font-size:48px;margin:9px 0}
-.card strong{display:block;font-size:13px;overflow-wrap:anywhere}
-.card small{font-size:11px;color:#d1b9d3;overflow-wrap:anywhere}
-.card button{margin-top:11px;width:100%}
-label{display:block;font-size:13px;margin:13px 0}
-input,select{display:block;width:100%;padding:12px;margin-top:5px;background:#211728;border:1px solid #775777;border-radius:9px;color:white;font-size:15px}
-form{margin-top:10px}
-.message{padding:13px;border-radius:12px;background:#604057;margin:12px 0;font-size:13px}
-footer{text-align:center;font-size:11px;color:#bca6be;padding:20px}
-</style>
-</head>
-<body>
-<header>
-<h1>📚 Bookish Hearts 💖</h1>
-<p>Read it. Collect it. Love it.</p>
-</header>
-<main>
-<section class="panel hero">
-<div class="small">✨ YOUR READING ADVENTURE</div>
-<h2 id="level">Level 1 · Bookish Beginner</h2>
-<div class="stats">
-<div class="stat"><strong id="bookCount">0</strong><small>Books</small></div>
-<div class="stat"><strong id="heartCount">0</strong><small>Hearts ♥</small></div>
-<div class="stat"><strong id="seriesCount">0</strong><small>Series</small></div>
-</div>
-<div class="small" id="progress">0 / 5 XP to next level</div>
-<div class="bar"><div id="fill"></div></div>
-</section>
-<nav>
-<button class="active" data-tab="books">📚 Books</button>
-<button data-tab="albums">🥀 Albums</button>
-<button data-tab="series">👑 Series</button>
-<button data-tab="shop">💗 Shop</button>
-</nav>
+<section class="panel hero"><div class="small">✨ YOUR READING ADVENTURE</div><h2 id="level">Level 1 · Bookish Beginner</h2><div class="stats"><div><strong id="bookCount">0</strong><small>Books</small></div><div><strong id="heartCount">0</strong><small>Hearts ♥</small></div><div><strong id="seriesCount">0</strong><small>Series</small></div></div><div class="small" id="progress">0 / 5 XP</div><div class="bar"><div class="fill" id="fill"></div></div></section>
+<nav><button data-tab="books" class="active">📚 Books</button><button data-tab="find">🔎 Find Books</button><button data-tab="stickers">💖 Stickers</button><button data-tab="albums">🥀 Albums</button><button data-tab="series">👑 Series</button><button data-tab="shop">🛍️ Shop</button></nav>
 <div id="content"></div>
 </main>
 <footer>Bookish Hearts ♡ Made for book lovers</footer>
+<div id="authModal"><div class="panel"><h2>💕 Bookish Hearts</h2><label>Email<input id="authEmail" type="email" autocomplete="email"></label><label>Password<input id="authPassword" type="password" autocomplete="current-password"></label><div class="actions"><button id="signIn">Sign In</button><button id="signUp">Sign Up</button><button id="authClose">Close</button></div><p id="authMessage" role="status"></p></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const genres={
-"Dark Romance":"🥀",
-"Romantic Comedy":"💕",
-"Fantasy":"🐉",
-"Horror":"👻",
-"Thriller":"🕷️",
-"Mystery":"🗝️",
-"Romance":"🌹",
-"Science Fiction":"🪐",
-"Contemporary":"☕",
-"Nonfiction":"📖"
-};
-const rewards=[
-{id:"rose",name:"Midnight Rose",icon:"🥀",cost:25},
-{id:"ghost",name:"Ghost Reader",icon:"👻",cost:35},
-{id:"dragon",name:"Golden Dragon",icon:"🐉",cost:75},
-{id:"shelf",name:"Haunted Shelf",icon:"🏚️",cost:100},
-{id:"queen",name:"Queen of Nightmares",icon:"👑",cost:150},
-{id:"raven",name:"Raven Queen",icon:"🖤",cost:110}
-];
+(()=>{
+'use strict';
 const $=id=>document.getElementById(id);
-const escapeHTML=s=>String(s||"").replace(/[&<>"']/g,c=>({
-"&":"&amp;","<":"&lt;",">":"&gt;",
-'"':"&quot;","'":"&#39;"
-}[c]));
-let state={books:[],spent:0,owned:[]};
-try{
-const saved=JSON.parse(localStorage.getItem("bookishV2"));
-if(saved&&Array.isArray(saved.books)&&Array.isArray(saved.owned)){
-state={books:saved.books,spent:Number(saved.spent)||0,owned:saved.owned};
-}
-}catch(e){}
-let tab="books";
-function save(){
-localStorage.setItem("bookishV2",JSON.stringify(state));
-render();
-}
-function groups(){
-const map={};
-for(const book of state.books){
-const key=(book.series||"").trim().toLowerCase();
-if(!key)continue;
-if(!map[key])map[key]={name:book.series,total:Number(book.total)||0,books:[]};
-map[key].books.push(book);
-map[key].total=Math.max(map[key].total,Number(book.total)||0);
-}
-return Object.values(map);
-}
-function completed(){
-return groups().filter(s=>s.total>0&&new Set(s.books.map(b=>b.title.trim().toLowerCase())).size>=s.total);
-}
-function xp(){
-return state.books.length+completed().length*5;
-}
-function balance(){
-return Math.max(0,xp()-state.spent);
-}
+const genres={'Dark Romance':'🥀','Romantic Comedy':'💕','Fantasy':'🐉','Horror':'👻','Thriller':'🕷️','Mystery':'🗝️','Romance':'🌹','Science Fiction':'🪐','Contemporary':'☕','Nonfiction':'📖'};
+const rewards=[['rose','Midnight Rose','🥀',25],['ghost','Ghost Reader','👻',35],['dragon','Golden Dragon','🐉',75],['shelf','Haunted Shelf','🏚️',100],['queen','Queen of Nightmares','👑',150],['raven','Raven Queen','🖤',110]];
+let state={books:[],spent:0,owned:[]}, stickers=[];
+try{let old=JSON.parse(localStorage.getItem('bookishV2')||'null');if(old&&Array.isArray(old.books)){state={books:old.books,spent:Number(old.spent)||0,owned:Array.isArray(old.owned)?old.owned:[]}}}catch{}
+try{let old=JSON.parse(localStorage.getItem('bookishSearchStickers')||'[]');if(Array.isArray(old))stickers=old}catch{}
+const store=()=>{localStorage.setItem('bookishV2',JSON.stringify(state));render()};
+const storeStickers=()=>{localStorage.setItem('bookishSearchStickers',JSON.stringify(stickers));render()};
+const node=(tag,txt,cls)=>{let el=document.createElement(tag);if(txt!==undefined)el.textContent=txt;if(cls)el.className=cls;return el};
+const groups=()=>{let map={};state.books.forEach(b=>{let k=(b.series||'').trim().toLowerCase();if(!k)return;if(!map[k])map[k]={name:b.series,total:Number(b.total)||0,books:[]};map[k].books.push(b);map[k].total=Math.max(map[k].total,Number(b.total)||0)});return Object.values(map)};
+const completed=()=>groups().filter(s=>s.total>0&&new Set(s.books.map(b=>b.title.toLowerCase())).size>=s.total);
+const xp=()=>state.books.length+completed().length*5;
+const balance=()=>Math.max(0,xp()-state.spent);
+let tab='books';
 function render(){
-const score=xp(),lvl=1+Math.floor(score/5);
-const names=["Bookish Beginner","Page Turner","Heart Collector","Sticker Hunter","Book Dragon","Bookish Royalty"];
-$("level").textContent="Level "+lvl+" · "+(names[Math.min(lvl-1,names.length-1)]);
-$("bookCount").textContent=state.books.length;
-$("heartCount").textContent=balance();
-$("seriesCount").textContent=completed().length;
-$("progress").textContent=(score%5)+" / 5 XP to next level";
-$("fill").style.width=((score%5)*20)+"%";
-document.querySelectorAll("[data-tab]").forEach(b=>{
-b.classList.toggle("active",b.dataset.tab===tab);
-});
-let html="";
-if(tab==="books"){
-html='<div class="panel"><h2>💖 Finish a book</h2><p class="small">Earn a sticker, 1 heart, and 1 XP for every finished book.</p><form id="bookForm"><label>Book title<input name="title" maxlength="120" required placeholder="Book title"></label><label>Author<input name="author" maxlength="100" placeholder="Author name"></label><label>Genre<select name="genre">'+Object.keys(genres).map(g=>'<option>'+g+'</option>').join("")+'</select></label><label>Series name (optional)<input name="series" maxlength="120" placeholder="Example: My Favorite Series"></label><label>Total books in series<input name="total" type="number" min="1" max="100" placeholder="Example: 3"></label><button class="primary wide">💗 Collect My Sticker</button></form></div><h2>📖 My Finished Books</h2>';
-html+=state.books.length?'<div class="grid">'+state.books.map(b=>'<div class="card"><div class="emoji">'+genres[b.genre]+'</div><strong>'+escapeHTML(b.title)+'</strong><small>'+escapeHTML(b.author)+'</small><p class="small">+1 ♥</p></div>').join("")+'</div>':'<div class="panel small">Your collection is waiting! Add your first finished book.</div>';
+let pts=xp(),lvl=1+Math.floor(pts/5);$('level').textContent='Level '+lvl+' · '+(['Bookish Beginner','Page Turner','Heart Collector','Sticker Hunter','Book Dragon','Bookish Royalty'][Math.min(lvl-1,5)]);
+$('bookCount').textContent=state.books.length;$('heartCount').textContent=balance();$('seriesCount').textContent=completed().length;$('progress').textContent=(pts%5)+' / 5 XP to next level';$('fill').style.width=(pts%5*20)+'%';
+document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+const c=$('content');c.replaceChildren();
+if(tab==='books'){
+let p=node('section',undefined,'panel');p.append(node('h2','💖 Finish a Book'),node('p','Earn a heart and XP for every finished book.','small'));
+let form=node('form');form.id='bookForm';[['title','Book title','text'],['author','Author','text'],['series','Series name (optional)','text'],['total','Total books in series','number']].forEach(([key,label,type])=>{let wrap=node('label',label),inp=node('input');inp.name=key;inp.type=type;if(key==='title')inp.required=true;if(type==='number')inp.min='1';wrap.append(inp);form.append(wrap)});
+let wrap=node('label','Genre'),select=node('select');select.name='genre';Object.keys(genres).forEach(g=>{let o=node('option',g);o.value=g;select.append(o)});wrap.append(select);form.append(wrap);let submit=node('button','💗 Collect My Sticker','wide');submit.type='submit';form.append(submit);p.append(form);c.append(p,node('h2','📖 My Finished Books'));
+if(!state.books.length)c.append(node('p','Your collection is waiting! Add your first finished book.','panel small'));else{let grid=node('div',undefined,'grid');state.books.forEach(b=>{let card=node('div',undefined,'card');card.append(node('div',genres[b.genre]||'📚','emoji'),node('strong',b.title),node('small',b.author||''));grid.append(card)});c.append(grid)}
+}else if(tab==='find'){
+let p=node('section',undefined,'panel');p.append(node('h2','🔎 Search Real Books'),node('p','Search by title or author. Tap Collect to save a cover as a sticker.','small'));
+let row=node('form',undefined,'searchrow');row.id='searchForm';let input=node('input');input.id='bookQuery';input.placeholder='Book title or author';input.required=true;input.setAttribute('aria-label','Search books');let btn=node('button','Search 🔎');btn.type='submit';row.append(input,btn);p.append(row);let status=node('p','Search for a book to get started.','book-note');status.id='bookMessage';status.setAttribute('role','status');p.append(status);c.append(p);let grid=node('div',undefined,'grid');grid.id='bookResults';c.append(grid);
+}else if(tab==='stickers'){
+c.append(node('h2','💖 My Book-Cover Stickers'));let grid=node('div',undefined,'grid');if(!stickers.length)c.append(node('p','No stickers yet! Go to Find Books to collect one.','panel small'));stickers.forEach(book=>grid.append(bookCard(book,true)));c.append(grid);
+}else if(tab==='albums'){
+c.append(node('h2','🥀 Genre Sticker Albums'));let grid=node('div',undefined,'grid');Object.entries(genres).forEach(([name,icon])=>{let card=node('div',undefined,'card');card.append(node('div',icon,'emoji'),node('strong',name),node('small',state.books.filter(b=>b.genre===name).length+' books'));grid.append(card)});c.append(grid);
+}else if(tab==='series'){
+c.append(node('h2','👑 Series Collections'));let all=groups();if(!all.length)c.append(node('p','Add series names while logging books to track your progress.','panel small'));all.forEach(s=>{let count=new Set(s.books.map(b=>b.title.toLowerCase())).size;let card=node('div',undefined,'panel');card.append(node('strong',s.name),node('p',count+' of '+(s.total||'?')+' books finished'),node('p',s.total&&count>=s.total?'👑 Legendary series unlocked!':'🔒 Keep reading'));c.append(card)});
+}else if(tab==='shop'){
+c.append(node('h2','🛍️ The Heart Shop'),node('p','You have '+balance()+' hearts. These are free in-app rewards.','panel'));let grid=node('div',undefined,'grid');rewards.forEach(([id,name,emoji,cost])=>{let card=node('div',undefined,'card');card.append(node('div',emoji,'emoji'),node('strong',name));let btn=node('button',state.owned.includes(id)?'✓ Owned':cost+' ♥ Unlock');btn.disabled=state.owned.includes(id)||balance()<cost;btn.onclick=()=>{state.spent+=cost;state.owned.push(id);store()};card.append(btn);grid.append(card)});c.append(grid)}
 }
-if(tab==="albums"){
-html="<h2>🥀 Genre Sticker Albums</h2><div class='grid'>";
-for(const [genre,icon] of Object.entries(genres)){
-const count=state.books.filter(b=>b.genre===genre).length;
-html+='<div class="card"><div class="emoji">'+icon+'</div><strong>'+genre+'</strong><small>'+count+' stickers collected</small></div>';
-}
-html+="</div>";
-}
-if(tab==="series"){
-html="<h2>👑 Series Collections</h2><p class='small'>Finish every book in a series for 5 bonus hearts, 5 XP, and a legendary badge!</p>";
-const all=groups();
-html+=all.length?all.map(s=>{
-const unique=new Set(s.books.map(b=>b.title.trim().toLowerCase())).size;
-const done=s.total>0&&unique>=s.total;
-return '<div class="panel"><h3>'+escapeHTML(s.name)+'</h3><p class="small">'+unique+' of '+(s.total||"?")+' books finished</p><div class="bar"><div class="fill" style="height:100%;width:'+Math.min(100,s.total?unique/s.total*100:0)+'%;background:#ff87b5"></div></div><p>'+ (done?"👑 Legendary Series Sticker Unlocked! +5 ♥":"🔒 Finish the series to unlock your crown")+'</p></div>';
-}).join(""):'<div class="panel small">Add a series name when logging books to start a collection.</div>';
-}
-if(tab==="shop"){
-html='<h2>🛍️ The Heart Shop</h2><div class="panel"><strong>💗 Your wallet: '+balance()+' hearts</strong><p class="small">Earn hearts by reading. Paid heart packs will be added after secure checkout is connected.</p></div><div class="grid">';
-for(const item of rewards){
-const owned=state.owned.includes(item.id);
-html+='<div class="card"><div class="emoji">'+item.icon+'</div><strong>'+item.name+'</strong><small>Exclusive collectible</small><button class="primary" data-buy="'+item.id+'" '+(owned||balance()<item.cost?"disabled":"")+'>'+(owned?"✓ Unlocked":item.cost+" ♥ Unlock")+'</button></div>';
-}
-html+='</div>';
-}
-$("content").innerHTML=html;
-}
-document.addEventListener("click",e=>{
-const button=e.target.closest("button");
-if(!button)return;
-if(button.dataset.tab){
-tab=button.dataset.tab;render();
-}
-if(button.dataset.buy){
-const item=rewards.find(x=>x.id===button.dataset.buy);
-if(!item||state.owned.includes(item.id)||balance()<item.cost)return;
-state.spent+=item.cost;
-state.owned.push(item.id);
-save();
-alert("✨ "+item.name+" unlocked!");
-}
-});
-document.addEventListener("submit",e=>{
-if(e.target.id!=="bookForm")return;
-e.preventDefault();
-const f=new FormData(e.target);
-const title=String(f.get("title")||"").trim();
-const series=String(f.get("series")||"").trim();
-const total=Number(f.get("total"))||0;
-if(!title)return;
-if(series&&!total){alert("Enter the total number of books in this series.");return;}
-if(state.books.some(b=>b.title.toLowerCase()===title.toLowerCase()&&b.author.toLowerCase()===String(f.get("author")||"").trim().toLowerCase())){
-alert("This book is already in your collection.");return;
-}
-const before=completed().length;
-state.books.push({
-title,author:String(f.get("author")||"").trim(),
-genre:String(f.get("genre")),
-series,total
-});
-const bonus=completed().length>before;
-save();
-alert(bonus?"👑 SERIES COMPLETE! Legendary sticker and 5 bonus hearts unlocked!":"💖 New book sticker collected! +1 heart!");
-});
+function bookCard(book,collected){let card=node('div',undefined,'card sticker');let img=node('img');img.className='cover';img.alt='Cover of '+book.title;img.loading='lazy';if(book.cover)img.src=book.cover;let btn=node('button',collected?'Remove sticker':'Collect 💕');btn.disabled=!collected&&stickers.some(x=>x.id===book.id);if(btn.disabled)btn.textContent='Collected 💖';btn.onclick=()=>{if(collected)stickers=stickers.filter(x=>x.id!==book.id);else if(!stickers.some(x=>x.id===book.id))stickers.push(book);storeStickers();if(!collected&&tab==='find')btn.textContent='Collected 💖'};card.append(img,node('strong',book.title),node('small',book.author||'Unknown author'),btn);return card}
+async function searchBooks(){const q=$('bookQuery').value.trim();if(!q)return;const msg=$('bookMessage'),results=$('bookResults');msg.textContent='Searching books...';results.replaceChildren();try{const response=await fetch('https://www.googleapis.com/books/v1/volumes?q='+encodeURIComponent(q)+'&maxResults=20');if(!response.ok)throw Error('Google Books returned '+response.status);const json=await response.json();const books=(json.items||[]).map(x=>({id:x.id,title:x.volumeInfo?.title||'Untitled',author:(x.volumeInfo?.authors||[]).join(', '),cover:(x.volumeInfo?.imageLinks?.thumbnail||'').replace(/^http:/,'https:')}));msg.textContent=books.length?'Tap Collect to save a book-cover sticker!':'No books found. Try another title or author.';books.forEach(b=>results.append(bookCard(b,false)))}catch(e){console.error(e);msg.textContent='Could not load books. Check your connection and try again.'}}
+document.addEventListener('submit',e=>{if(e.target.id==='searchForm'){e.preventDefault();searchBooks();return}if(e.target.id==='bookForm'){e.preventDefault();let f=new FormData(e.target),title=String(f.get('title')||'').trim();if(!title)return;let author=String(f.get('author')||'').trim();if(state.books.some(b=>b.title.toLowerCase()===title.toLowerCase()&&(b.author||'').toLowerCase()===author.toLowerCase())){alert('This book is already collected!');return}let series=String(f.get('series')||'').trim(),total=Number(f.get('total'))||0;if(series&&!total){alert('Enter the total number of books in this series.');return}state.books.push({title,author,series,total,genre:String(f.get('genre'))});store();alert('💖 Book collected! +1 heart')}});
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tab;render()}));
+let db=null;try{if(window.supabase)db=window.supabase.createClient('https://etiuirndinazjmakkuca.supabase.co','sb_publishable_TB5LEM-OVQhU6Pf4bsZcEw_6zMpFyUD')}catch(e){console.error('Authentication setup:',e)}
+$('authOpen').onclick=async()=>{if(db){try{let {data}=await db.auth.getUser();if(data?.user){if(confirm('Sign out of Bookish Hearts?'))await db.auth.signOut();return}}catch(e){console.error(e)}}$('authModal').style.display='flex'};
+$('authClose').onclick=()=>$('authModal').style.display='none';
+async function auth(signUp){let email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||!password){$('authMessage').textContent='Enter your email and password.';return}if(!db){$('authMessage').textContent='Sign-in service could not load. Try refreshing.';return}$('authMessage').textContent='Please wait...';try{let r=signUp?await db.auth.signUp({email,password}):await db.auth.signInWithPassword({email,password});if(r.error)throw r.error;if(signUp&&!r.data.session){$('authMessage').textContent='Check your email to confirm your account.'}else{$('authModal').style.display='none';$('authPassword').value=''}}catch(e){$('authMessage').textContent=e.message||'Could not sign in.'}}
+$('signIn').onclick=()=>auth(false);$('signUp').onclick=()=>auth(true);if(db)db.auth.onAuthStateChange((event,session)=>{$('authOpen').textContent=session?'Sign Out':'Sign In / Sign Up'});
 render();
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-(() => {
-  const db = window.supabase.createClient(
-    "https://etiuirndinazjmakkuca.supabase.co",
-    "sb_publishable_TB5LEM-OVQhU6Pf4bsZcEw_6zMpFyUD"
-  );
-
-  const panel = document.createElement("div");
-  panel.innerHTML = `
-    <button id="bhOpen" style="position:fixed;top:12px;right:12px;z-index:9999;background:#ec4899;color:white;padding:12px;border:0;border-radius:20px">
-      Sign In / Sign Up
-    </button>
-    <div id="bhBox" style="display:none;position:fixed;inset:0;background:#0009;z-index:10000;align-items:center;justify-content:center">
-      <div style="background:white;padding:25px;border-radius:18px;width:90%;max-width:350px;color:#333">
-        <h2>💕 Bookish Hearts</h2>
-        <input id="bhEmail" type="email" placeholder="Email" style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box">
-        <input id="bhPass" type="password" placeholder="Password" style="width:100%;padding:12px;margin:8px 0;box-sizing:border-box">
-        <button id="bhSignIn">Sign In</button>
-        <button id="bhSignUp">Sign Up</button>
-        <button id="bhClose">Close</button>
-        <p id="bhMessage"></p>
-      </div>
-    </div>`;
-  document.body.appendChild(panel);
-
-  const get = id => document.getElementById(id);
-  const message = text => get("bhMessage").textContent = text;
-
-  get("bhOpen").onclick = async () => {
-    const {data, error} = await db.auth.getUser();
-    if (error && !data?.user) {
-      get("bhBox").style.display = "flex";
-      return;
-    }
-    if (data.user) {
-      if (confirm("Sign out of Bookish Hearts?")) {
-        await db.auth.signOut();
-        get("bhOpen").textContent = "Sign In / Sign Up";
-      }
-    } else {
-      get("bhBox").style.display = "flex";
-    }
-  };
-
-  get("bhClose").onclick = () => {
-    get("bhBox").style.display = "none";
-  };
-
-  async function authenticate(signUp) {
-    const email = get("bhEmail").value.trim();
-    const password = get("bhPass").value;
-
-    if (!email || !password) {
-      message("Enter your email and password.");
-      return;
-    }
-
-    message("Please wait...");
-
-    const result = signUp
-      ? await db.auth.signUp({email,password})
-      : await db.auth.signInWithPassword({email,password});
-
-    if (result.error) {
-      message(result.error.message);
-    } else if (signUp && !result.data.session) {
-      message("Check your email to confirm your account!");
-    } else {
-      message("Welcome to Bookish Hearts!");
-      get("bhBox").style.display = "none";
-    }
-  }
-
-  get("bhSignIn").onclick = () => authenticate(false);
-  get("bhSignUp").onclick = () => authenticate(true);
-
-  db.auth.onAuthStateChange((_event, session) => {
-    get("bhOpen").textContent = session
-      ? "Sign Out"
-      : "Sign In / Sign Up";
-  });
 })();
 </script>
-
-<div id="bookFinder" style="display:none;position:fixed;inset:0;background:#fff0f8;z-index:9998;overflow:auto;padding:20px;text-align:center">
-  <h2>💕 Bookish Hearts Search</h2>
-  <button onclick="document.getElementById('bookFinder').style.display='none'">Close ✕</button>
-  <p><input id="bookQuery" placeholder="Book title or author"></p>
-  <button onclick="findBooks()">🔎 Search</button>
-  <p id="bookMessage"></p>
-  <div id="bookResults"></div>
-</div>
-<button onclick="document.getElementById('bookFinder').style.display='block'" style="position:fixed;bottom:20px;right:20px;z-index:9997;background:#ec4899;color:white;border:0;border-radius:20px;padding:14px">
-  📚 Find Books
-</button>
-
-<script>
-  window.findBooks = async function() {
-  const query = document.getElementById("bookQuery").value.trim();
-  const results = document.getElementById("bookResults");
-  const message = document.getElementById("bookMessage");
-
-  if (!query) {
-    message.textContent = "Enter a book title or author 💕";
-    return;
-  }
-
-  message.textContent = "Searching... 📚";
-  results.replaceChildren();
-
-  try {
-    const url = "https://www.googleapis.com/books/v1/volumes?q="
-      + encodeURIComponent(query) + "&maxResults=12";
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Search failed");
-
-    const data = await response.json();
-    message.textContent = data.items?.length
-      ? "Here are your books! 💖"
-      : "No books found.";
-
-    (data.items || []).forEach(book => {
-      const info = book.volumeInfo || {};
-      const card = document.createElement("div");
-      card.style.cssText =
-        "display:inline-block;width:130px;margin:10px;vertical-align:top";
-
-      const cover = document.createElement("img");
-      cover.src = (info.imageLinks?.thumbnail || "")
-        .replace(/^http:/, "https:");
-      cover.alt = info.title || "Book cover";
-      cover.style.cssText =
-        "width:110px;height:160px;object-fit:contain";
-
-      const title = document.createElement("p");
-      title.textContent = info.title || "Unknown title";
-
-      card.append(cover, title);
-      results.appendChild(card);
-    });
-  } catch {
-    message.textContent = "Couldn't load books. Try again.";
-  }
-}
-</script>
-
-  </body>
-
-</html>
-
+</body></html>
