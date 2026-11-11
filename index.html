@@ -535,7 +535,7 @@ render();
 </button>
 
 <script>
-async function findBooks() {
+  window.findBooks = async function() {
   const query = document.getElementById("bookQuery").value.trim();
   const results = document.getElementById("bookResults");
   const message = document.getElementById("bookMessage");
