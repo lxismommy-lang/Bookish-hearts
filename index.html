@@ -57,7 +57,6 @@ c.append(node('h2','👑 Series Collections'));let all=groups();if(!all.length)c
 c.append(node('h2','🛍️ The Heart Shop'),node('p','You have '+balance()+' hearts. These are free in-app rewards.','panel'));let grid=node('div',undefined,'grid');rewards.forEach(([id,name,emoji,cost])=>{let card=node('div',undefined,'card');card.append(node('div',emoji,'emoji'),node('strong',name));let btn=node('button',state.owned.includes(id)?'✓ Owned':cost+' ♥ Unlock');btn.disabled=state.owned.includes(id)||balance()<cost;btn.onclick=()=>{state.spent+=cost;state.owned.push(id);store()};card.append(btn);grid.append(card)});c.append(grid)}
 }
 function bookCard(book,collected){let card=node('div',undefined,'card sticker');let img=node('img');img.className='cover';img.alt='Cover of '+book.title;img.loading='lazy';if(book.cover)img.src=book.cover;let btn=node('button',collected?'Remove sticker':'Collect 💕');btn.disabled=!collected&&stickers.some(x=>x.id===book.id);if(btn.disabled)btn.textContent='Collected 💖';btn.onclick=()=>{if(collected)stickers=stickers.filter(x=>x.id!==book.id);else if(!stickers.some(x=>x.id===book.id))stickers.push(book);storeStickers();if(!collected&&tab==='find')btn.textContent='Collected 💖'};card.append(img,node('strong',book.title),node('small',book.author||'Unknown author'),btn);return card}
-
 async function searchBooks() {
   const q = $('bookQuery').value.trim();
   if (!q) return;
