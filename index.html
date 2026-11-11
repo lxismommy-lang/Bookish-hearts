@@ -521,7 +521,70 @@ render();
   });
 })();
 </script>
-/body>
+
+<div id="bookFinder" style="display:none;position:fixed;inset:0;background:#fff0f8;z-index:9998;overflow:auto;padding:20px;text-align:center">
+  <h2>💕 Bookish Hearts Search</h2>
+  <button onclick="document.getElementById('bookFinder').style.display='none'">Close ✕</button>
+  <p><input id="bookQuery" placeholder="Book title or author"></p>
+  <button onclick="findBooks()">🔎 Search</button>
+  <p id="bookMessage"></p>
+  <div id="bookResults"></div>
+</div>
+<button onclick="document.getElementById('bookFinder').style.display='block'" style="position:fixed;bottom:20px;right:20px;z-index:9997;background:#ec4899;color:white;border:0;border-radius:20px;padding:14px">
+  📚 Find Books
+</button>
+
+<script>
+async function findBooks() {
+  const query = document.getElementById("bookQuery").value.trim();
+  const results = document.getElementById("bookResults");
+  const message = document.getElementById("bookMessage");
+
+  if (!query) {
+    message.textContent = "Enter a book title or author 💕";
+    return;
+  }
+
+  message.textContent = "Searching... 📚";
+  results.replaceChildren();
+
+  try {
+    const url = "https://www.googleapis.com/books/v1/volumes?q="
+      + encodeURIComponent(query) + "&maxResults=12";
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Search failed");
+
+    const data = await response.json();
+    message.textContent = data.items?.length
+      ? "Here are your books! 💖"
+      : "No books found.";
+
+    (data.items || []).forEach(book => {
+      const info = book.volumeInfo || {};
+      const card = document.createElement("div");
+      card.style.cssText =
+        "display:inline-block;width:130px;margin:10px;vertical-align:top";
+
+      const cover = document.createElement("img");
+      cover.src = (info.imageLinks?.thumbnail || "")
+        .replace(/^http:/, "https:");
+      cover.alt = info.title || "Book cover";
+      cover.style.cssText =
+        "width:110px;height:160px;object-fit:contain";
+
+      const title = document.createElement("p");
+      title.textContent = info.title || "Unknown title";
+
+      card.append(cover, title);
+      results.appendChild(card);
+    });
+  } catch {
+    message.textContent = "Couldn't load books. Try again.";
+  }
+}
+</script>
+
+  /body>
 
 </html>
 
