@@ -98,6 +98,31 @@ $('authOpen').onclick=async()=>{if(db){try{let {data}=await db.auth.getUser();if
 $('authClose').onclick=()=>$('authModal').style.display='none';
 async function auth(signUp){let email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||!password){$('authMessage').textContent='Enter your email and password.';return}if(!db){$('authMessage').textContent='Sign-in service could not load. Try refreshing.';return}$('authMessage').textContent='Please wait...';try{let r=signUp?await db.auth.signUp({email,password}):await db.auth.signInWithPassword({email,password});if(r.error)throw r.error;if(signUp&&!r.data.session){$('authMessage').textContent='Check your email to confirm your account.'}else{$('authModal').style.display='none';$('authPassword').value=''}}catch(e){$('authMessage').textContent=e.message||'Could not sign in.'}}
 $('signIn').onclick=()=>auth(false);$('signUp').onclick=()=>auth(true);if(db)db.auth.onAuthStateChange((event,session)=>{$('authOpen').textContent=session?'Sign Out':'Sign In / Sign Up'});
+
+
+document.addEventListener('submit', function(event) {
+  if (event.target.id !== 'bookForm') return;
+
+  event.preventDefault();
+
+  const form = event.target;
+  const data = new FormData(form);
+
+  const book = {
+    id: Date.now().toString(),
+    title: String(data.get('title') || '').trim(),
+    author: String(data.get('author') || '').trim(),
+    series: String(data.get('series') || '').trim(),
+    total: Number(data.get('total')) || 0,
+    genre: String(data.get('genre') || 'Romance')
+  };
+
+  if (!book.title) return;
+
+  state.books.push(book);
+  store();
+});
+
 render();
 })();
 </script>
