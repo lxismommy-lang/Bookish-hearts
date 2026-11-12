@@ -200,7 +200,29 @@ searchBooks = async function () {
     return score(b) - score(a);
   });
 
-  unique.forEach(b => results.append(bookCard(b, false)));
+  
+const terms = q.toLowerCase()
+  .replace(/[^a-z0-9\s]/g, ' ')
+  .split(/\s+/)
+  .filter(word => word.length >= 3);
+
+const matchingBooks = unique.filter(book => {
+  const searchable = (
+    (book.title || '') + ' ' + (book.author || '')
+  ).toLowerCase();
+
+  return terms.length > 0 &&
+    terms.every(word => searchable.includes(word));
+});
+
+matchingBooks.forEach(book => {
+  results.append(bookCard(book, false));
+});
+
+msg.textContent = matchingBooks.length
+  ? matchingBooks.length + ' matching books found! 💕'
+  : 'No exact matches found. Try searching by title only.';
+
 
   msg.textContent = unique.length
     ? unique.length + ' books found! Tap Collect 💕'
