@@ -123,6 +123,90 @@ document.addEventListener('submit', function(event) {
   store();
 });
 
+searchBooks = async function () {
+  const q = $('bookQuery').value.trim();
+  if (!q) return;
+
+  const msg = $('bookMessage');
+  const results = $('bookResults');
+
+  msg.textContent = 'Searching both book libraries...';
+  results.replaceChildren();
+
+  const books = [];
+
+  const searches = await Promise.allSettled([
+    fetch('https://www.googleapis.com/books/v1/volumes?q=' +
+      encodeURIComponent(q) + '&maxResults=40')
+      .then(r => {
+        if (!r.ok) throw Error('Google search failed');
+        return r.json();
+      }),
+    fetch('https://openlibrary.org/search.json?q=' +
+      encodeURIComponent(q) + '&limit=40')
+      .then(r => {
+        if (!r.ok) throw Error('Open Library search failed');
+        return r.json();
+      })
+  ]);
+
+  if (searches[0].status === 'fulfilled') {
+    (searches[0].value.items || []).forEach(item => {
+      const b = item.volumeInfo || {};
+      books.push({
+        id: 'google-' + item.id,
+        title: b.title || 'Untitled',
+        author: (b.authors || []).join(', '),
+        cover: (b.imageLinks?.thumbnail ||
+          b.imageLinks?.smallThumbnail || '')
+          .replace(/^http:/, 'https:')
+      });
+    });
+  }
+
+  if (searches[1].status === 'fulfilled') {
+    (searches[1].value.docs || []).forEach(b => {
+      books.push({
+        id: 'open-' + b.key,
+        title: b.title || 'Untitled',
+        author: (b.author_name || []).join(', '),
+        cover: b.cover_i
+          ? 'https://covers.openlibrary.org/b/id/' +
+            b.cover_i + '-M.jpg'
+          : ''
+      });
+    });
+  }
+
+  const unique = [];
+  const seen = new Set();
+
+  books.forEach(b => {
+    const key = (b.title + '|' + b.author)
+      .toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (!seen.has(key)) {
+      seen.add(key);
+      unique.push(b);
+    }
+  });
+
+  const query = q.toLowerCase();
+  unique.sort((a, b) => {
+    const score = book =>
+      (book.title.toLowerCase() === query ? 100 : 0) +
+      (book.title.toLowerCase().includes(query) ? 20 : 0) +
+      (book.author.toLowerCase().includes(query) ? 10 : 0) +
+      (book.cover ? 5 : 0);
+    return score(b) - score(a);
+  });
+
+  unique.forEach(b => results.append(bookCard(b, false)));
+
+  msg.textContent = unique.length
+    ? unique.length + ' books found! Tap Collect 💕'
+    : 'No matching books found in either library.';
+};
+
 render();
 })();
 </script>
