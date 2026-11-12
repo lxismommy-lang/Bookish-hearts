@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#211325"><title>Bookish Hearts</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#1c1223;color:#fff1f5;font-family:Arial,sans-serif}header{text-align:center;padding:22px 15px;background:#39203c}h1{margin:0;color:#ff94be;font-size:29px}header p{font-size:13px;color:#e2bed0}main{max-width:720px;padding:15px;margin:auto}.panel,.card{background:#35243c;border:1px solid #65496c;border-radius:15px;padding:15px;margin-bottom:12px}.hero{background:linear-gradient(135deg,#67375b,#382642)}.small{font-size:12px;color:#e1c4d6}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center;margin:15px 0}.stats div{background:#211728;padding:10px;border-radius:10px}.stats strong{display:block;font-size:23px;color:#ffaece}.stats small{font-size:10px}.bar{height:9px;background:#211728;border-radius:20px;overflow:hidden}.fill{height:100%;width:0;background:#ff87b5}nav{display:flex;gap:6px;overflow-x:auto;margin:15px 0}button{border:0;border-radius:12px;padding:11px 13px;background:#ff91bb;color:#311a2b;font-weight:bold;cursor:pointer}nav button{white-space:nowrap;background:#513451;color:#fff}nav button.active{background:#ff91bb;color:#311a2b}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.card{text-align:center;min-width:0;overflow-wrap:anywhere}.card strong,.card small{display:block;margin:8px 0}.cover{display:block;margin:0 auto 8px;width:112px;height:165px;object-fit:contain;border-radius:8px;background:#271b30}.emoji{font-size:44px}.wide{width:100%}input,select{width:100%;padding:12px;margin:6px 0 12px;background:#211728;border:1px solid #775777;border-radius:9px;color:white;font-size:15px}label{display:block;margin-top:10px}h2{font-size:19px}footer{text-align:center;padding:18px;color:#bca6be;font-size:11px}#authModal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#000b;z-index:20;padding:14px}#authModal .panel{width:100%;max-width:380px;background:#fff4fa;color:#3b1934}#authModal input{background:white;color:#222;border-color:#c7a4c0}.topbar{display:flex;align-items:center;justify-content:flex-end;padding:10px 14px}.searchrow{display:flex;gap:7px}.searchrow input{flex:1;min-width:0;margin:0}.searchrow button{flex-shrink:0}.book-note{margin:10px 0;font-size:13px}.actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:center}button:disabled{opacity:.55}.sticker{border:4px solid #ffe3f0;transform:rotate(-1deg)}.sticker:nth-child(2n){transform:rotate(2deg)}
+</style></head>
+<body>
+<header><h1>📚 Bookish Hearts 💖</h1><p>Read it. Collect it. Love it.</p></header>
+<div class="topbar"><button id="authOpen">Sign In / Sign Up</button></div>
+<main>
+<section class="panel hero"><div class="small">✨ YOUR READING ADVENTURE</div><h2 id="level">Level 1 · Bookish Beginner</h2><div class="stats"><div><strong id="bookCount">0</strong><small>Books</small></div><div><strong id="heartCount">0</strong><small>Hearts ♥</small></div><div><strong id="seriesCount">0</strong><small>Series</small></div></div><div class="small" id="progress">0 / 5 XP</div><div class="bar"><div class="fill" id="fill"></div></div></section>
+<nav><button data-tab="books" class="active">📚 Books</button><button data-tab="find">🔎 Find Books</button><button data-tab="stickers">💖 Stickers</button><button data-tab="albums">🥀 Albums</button><button data-tab="series">👑 Series</button><button data-tab="shop">🛍️ Shop</button></nav>
+<div id="content"></div>
+</main>
+<footer>Bookish Hearts ♡ Made for book lovers</footer>
+<div id="authModal"><div class="panel"><h2>💕 Bookish Hearts</h2><label>Email<input id="authEmail" type="email" autocomplete="email"></label><label>Password<input id="authPassword" type="password" autocomplete="current-password"></label><div class="actions"><button id="signIn">Sign In</button><button id="signUp">Sign Up</button><button id="authClose">Close</button></div><p id="authMessage" role="status"></p></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const genres={'Dark Romance':'🥀','Romantic Comedy':'💕','Fantasy':'🐉','Horror':'👻','Thriller':'🕷️','Mystery':'🗝️','Romance':'🌹','Science Fiction':'🪐','Contemporary':'☕','Nonfiction':'📖'};
+const rewards=[['rose','Midnight Rose','🥀',25],['ghost','Ghost Reader','👻',35],['dragon','Golden Dragon','🐉',75],['shelf','Haunted Shelf','🏚️',100],['queen','Queen of Nightmares','👑',150],['raven','Raven Queen','🖤',110]];
+let state={books:[],spent:0,owned:[]}, stickers=[];
+try{let old=JSON.parse(localStorage.getItem('bookishV2')||'null');if(old&&Array.isArray(old.books)){state={books:old.books,spent:Number(old.spent)||0,owned:Array.isArray(old.owned)?old.owned:[]}}}catch{}
+try{let old=JSON.parse(localStorage.getItem('bookishSearchStickers')||'[]');if(Array.isArray(old))stickers=old}catch{}
+const store=()=>{localStorage.setItem('bookishV2',JSON.stringify(state));render()};
+const storeStickers=()=>{localStorage.setItem('bookishSearchStickers',JSON.stringify(stickers));render()};
+const node=(tag,txt,cls)=>{let el=document.createElement(tag);if(txt!==undefined)el.textContent=txt;if(cls)el.className=cls;return el};
+const groups=()=>{let map={};state.books.forEach(b=>{let k=(b.series||'').trim().toLowerCase();if(!k)return;if(!map[k])map[k]={name:b.series,total:Number(b.total)||0,books:[]};map[k].books.push(b);map[k].total=Math.max(map[k].total,Number(b.total)||0)});return Object.values(map)};
+const completed=()=>groups().filter(s=>s.total>0&&new Set(s.books.map(b=>b.title.toLowerCase())).size>=s.total);
+const xp=()=>state.books.length+completed().length*5;
+const balance=()=>Math.max(0,xp()-state.spent);
+let tab='books';
+function render(){
+let pts=xp(),lvl=1+Math.floor(pts/5);$('level').textContent='Level '+lvl+' · '+(['Bookish Beginner','Page Turner','Heart Collector','Sticker Hunter','Book Dragon','Bookish Royalty'][Math.min(lvl-1,5)]);
+$('bookCount').textContent=state.books.length;$('heartCount').textContent=balance();$('seriesCount').textContent=completed().length;$('progress').textContent=(pts%5)+' / 5 XP to next level';$('fill').style.width=(pts%5*20)+'%';
+document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+const c=$('content');c.replaceChildren();
+if(tab==='books'){
+let p=node('section',undefined,'panel');p.append(node('h2','💖 Finish a Book'),node('p','Earn a heart and XP for every finished book.','small'));
+let form=node('form');form.id='bookForm';[['title','Book title','text'],['author','Author','text'],['series','Series name (optional)','text'],['total','Total books in series','number']].forEach(([key,label,type])=>{let wrap=node('label',label),inp=node('input');inp.name=key;inp.type=type;if(key==='title')inp.required=true;if(type==='number')inp.min='1';wrap.append(inp);form.append(wrap)});
+let wrap=node('label','Genre'),select=node('select');select.name='genre';Object.keys(genres).forEach(g=>{let o=node('option',g);o.value=g;select.append(o)});wrap.append(select);form.append(wrap);let submit=node('button','💗 Collect My Sticker','wide');submit.type='submit';form.append(submit);p.append(form);c.append(p,node('h2','📖 My Finished Books'));
+if(!state.books.length)c.append(node('p','Your collection is waiting! Add your first finished book.','panel small'));else{let grid=node('div',undefined,'grid');state.books.forEach(b=>{let card=node('div',undefined,'card');card.append(node('div',genres[b.genre]||'📚','emoji'),node('strong',b.title),node('small',b.author||''));grid.append(card)});c.append(grid)}
+}else if(tab==='find'){
+let p=node('section',undefined,'panel');p.append(node('h2','🔎 Search Real Books'),node('p','Search by title or author. Tap Collect to save a cover as a sticker.','small'));
+let row=node('form',undefined,'searchrow');row.id='searchForm';row.onsubmit=e=>{e.preventDefault();searchBooks()};let input=node('input');input.id='bookQuery';input.placeholder='Book title or author';input.required=true;input.setAttribute('aria-label','Search books');let btn=node('button','Search 🔎');btn.type='button';btn.onclick=searchBooks;row.append(input,btn);p.append(row);let status=node('p','Search for a book to get started.','book-note');status.id='bookMessage';status.setAttribute('role','status');p.append(status);c.append(p);let grid=node('div',undefined,'grid');grid.id='bookResults';c.append(grid);
+}else if(tab==='stickers'){
+c.append(node('h2','💖 My Book-Cover Stickers'));let grid=node('div',undefined,'grid');if(!stickers.length)c.append(node('p','No stickers yet! Go to Find Books to collect one.','panel small'));stickers.forEach(book=>grid.append(bookCard(book,true)));c.append(grid);
+}else if(tab==='albums'){
+c.append(node('h2','🥀 Genre Sticker Albums'));let grid=node('div',undefined,'grid');Object.entries(genres).forEach(([name,icon])=>{let card=node('div',undefined,'card');card.append(node('div',icon,'emoji'),node('strong',name),node('small',state.books.filter(b=>b.genre===name).length+' books'));grid.append(card)});c.append(grid);
+}else if(tab==='series'){
+c.append(node('h2','👑 Series Collections'));let all=groups();if(!all.length)c.append(node('p','Add series names while logging books to track your progress.','panel small'));all.forEach(s=>{let count=new Set(s.books.map(b=>b.title.toLowerCase())).size;let card=node('div',undefined,'panel');card.append(node('strong',s.name),node('p',count+' of '+(s.total||'?')+' books finished'),node('p',s.total&&count>=s.total?'👑 Legendary series unlocked!':'🔒 Keep reading'));c.append(card)});
+}else if(tab==='shop'){
+c.append(node('h2','🛍️ The Heart Shop'),node('p','You have '+balance()+' hearts. These are free in-app rewards.','panel'));let grid=node('div',undefined,'grid');rewards.forEach(([id,name,emoji,cost])=>{let card=node('div',undefined,'card');card.append(node('div',emoji,'emoji'),node('strong',name));let btn=node('button',state.owned.includes(id)?'✓ Owned':cost+' ♥ Unlock');btn.disabled=state.owned.includes(id)||balance()<cost;btn.onclick=()=>{state.spent+=cost;state.owned.push(id);store()};card.append(btn);grid.append(card)});c.append(grid)}
+}
+function bookCard(book,collected){let card=node('div',undefined,'card sticker');let img=node('img');img.className='cover';img.alt='Cover of '+book.title;img.loading='lazy';if(book.cover)img.src=book.cover;let btn=node('button',collected?'Remove sticker':'Collect 💕');btn.disabled=!collected&&stickers.some(x=>x.id===book.id);if(btn.disabled)btn.textContent='Collected 💖';btn.onclick=()=>{if(collected)stickers=stickers.filter(x=>x.id!==book.id);else if(!stickers.some(x=>x.id===book.id))stickers.push(book);storeStickers();if(!collected&&tab==='find')btn.textContent='Collected 💖'};card.append(img,node('strong',book.title),node('small',book.author||'Unknown author'),btn);return card}
+async function searchBooks() {
+  const q = $('bookQuery').value.trim();
+  if (!q) return;
+  const msg = $('bookMessage');
+  const results = $('bookResults');
+  msg.textContent = 'Searching books...';
+  results.replaceChildren();
+
+  try {
+    const url = 'https://openlibrary.org/search.json?q=' +
+      encodeURIComponent(q) + '&limit=20';
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Search failed');
+
+    const data = await response.json();
+    const books = (data.docs || []).map(b => ({
+      id: b.key,
+      title: b.title || 'Untitled',
+      author: (b.author_name || []).join(', '),
+      cover: b.cover_i
+        ? 'https://covers.openlibrary.org/b/id/' + b.cover_i + '-M.jpg'
+        : ''
+    }));
+
+    msg.textContent = books.length
+      ? 'Tap Collect to save your book-cover stickers!'
+      : 'No books found. Try another title.';
+
+    books.forEach(b => results.append(bookCard(b, false)));
+  } catch (e) {
+    console.error(e);
+    msg.textContent = 'Could not load books. Please try again.';
+  }
+}
+
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tab;render()}));
+let db=null;try{if(window.supabase)db=window.supabase.createClient('https://etiuirndinazjmakkuca.supabase.co','sb_publishable_TB5LEM-OVQhU6Pf4bsZcEw_6zMpFyUD')}catch(e){console.error('Authentication setup:',e)}
+$('authOpen').onclick=async()=>{if(db){try{let {data}=await db.auth.getUser();if(data?.user){if(confirm('Sign out of Bookish Hearts?'))await db.auth.signOut();return}}catch(e){console.error(e)}}$('authModal').style.display='flex'};
+$('authClose').onclick=()=>$('authModal').style.display='none';
+async function auth(signUp){let email=$('authEmail').value.trim(),password=$('authPassword').value;if(!email||!password){$('authMessage').textContent='Enter your email and password.';return}if(!db){$('authMessage').textContent='Sign-in service could not load. Try refreshing.';return}$('authMessage').textContent='Please wait...';try{let r=signUp?await db.auth.signUp({email,password}):await db.auth.signInWithPassword({email,password});if(r.error)throw r.error;if(signUp&&!r.data.session){$('authMessage').textContent='Check your email to confirm your account.'}else{$('authModal').style.display='none';$('authPassword').value=''}}catch(e){$('authMessage').textContent=e.message||'Could not sign in.'}}
+$('signIn').onclick=()=>auth(false);$('signUp').onclick=()=>auth(true);if(db)db.auth.onAuthStateChange((event,session)=>{$('authOpen').textContent=session?'Sign Out':'Sign In / Sign Up'});
+
+
+document.addEventListener('submit', function(event) {
+  if (event.target.id !== 'bookForm') return;
+
+  event.preventDefault();
+
+  const form = event.target;
+  const data = new FormData(form);
+
+  const book = {
+    id: Date.now().toString(),
+    title: String(data.get('title') || '').trim(),
+    author: String(data.get('author') || '').trim(),
+    series: String(data.get('series') || '').trim(),
+    total: Number(data.get('total')) || 0,
+    genre: String(data.get('genre') || 'Romance')
+  };
+
+  if (!book.title) return;
+
+  state.books.push(book);
+  store();
+});
+
+searchBooks = async function () {
+  const q = $('bookQuery').value.trim();
+  if (!q) return;
+  const msg = $('bookMessage');
+  const results = $('bookResults');
+  msg.textContent = 'Searching Google Books and Open Library...';
+  results.replaceChildren();
+
+  const normalize = v => String(v || '').toLowerCase()
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
+  const isbn = q.replace(/[\s-]/g, '');
+  const isISBN = /^(?:\d{10}|\d{13}|\d{9}[xX])$/.test(isbn);
+  const queryWords = normalize(q).split(' ').filter(Boolean);
+  const titleGuess = queryWords.length > 2 ? queryWords.slice(0, 2).join(' ') : normalize(q);
+  const queries = isISBN ? [isbn] : [...new Set([q, titleGuess])];
+  const requests = [];
+  for (const query of queries) {
+    const googleQuery = isISBN ? 'isbn:' + query : query;
+    requests.push(fetch('https://www.googleapis.com/books/v1/volumes?q=' +
+      encodeURIComponent(googleQuery) + '&maxResults=40')
+      .then(r => {if (!r.ok) throw Error('Google Books unavailable'); return r.json()})
+      .then(data => (data.items || []).map(item => {
+        const b = item.volumeInfo || {};
+        return {
+          id: 'google-' + item.id,
+          title: b.title || 'Untitled',
+          author: (b.authors || []).join(', '),
+          isbn: (b.industryIdentifiers || []).map(x => x.identifier).filter(Boolean),
+          cover: (b.imageLinks?.thumbnail || b.imageLinks?.smallThumbnail || '')
+            .replace(/^http:/, 'https:')
+        };
+      })));
+    const olUrl = isISBN
+      ? 'https://openlibrary.org/search.json?isbn=' + encodeURIComponent(query) + '&limit=40'
+      : 'https://openlibrary.org/search.json?q=' + encodeURIComponent(query) + '&limit=40';
+    requests.push(fetch(olUrl)
+      .then(r => {if (!r.ok) throw Error('Open Library unavailable'); return r.json()})
+      .then(data => (data.docs || []).map(b => ({
+        id: 'open-' + b.key,
+        title: b.title || 'Untitled',
+        author: (b.author_name || []).join(', '),
+        isbn: b.isbn || [],
+        cover: b.cover_i
+          ? 'https://covers.openlibrary.org/b/id/' + b.cover_i + '-M.jpg'
+          : ''
+      }))));
+  }
+  const settled = await Promise.allSettled(requests);
+  const books = settled.filter(x => x.status === 'fulfilled').flatMap(x => x.value);
+  if (settled.every(x => x.status === 'rejected')) {
+    msg.textContent = 'Both book databases are unavailable. Please try again.';
+    return;
+  }
+  const seen = new Map();
+  for (const book of books) {
+    const key = normalize(book.title) + '|' + normalize(book.author);
+    if (!seen.has(key) || (!seen.get(key).cover && book.cover)) seen.set(key, book);
+  }
+  const scored = [...seen.values()].map(book => {
+    const title = normalize(book.title);
+    const author = normalize(book.author);
+    const full = normalize(q);
+    const words = new Set((title + ' ' + author).split(' '));
+    const isbnMatch = isISBN && book.isbn.some(id => id.replace(/[\s-]/g, '').toLowerCase() === isbn.toLowerCase());
+    const titleMatch = !isISBN && (title === full || title.includes(full) ||
+      (titleGuess.length > 3 && title.includes(titleGuess)));
+    const allWords = !isISBN && queryWords.every(word => words.has(word));
+    const authorMatch = !isISBN && author.includes(full);
+    const valid = isISBN ? isbnMatch : titleMatch || allWords || authorMatch;
+    const score = (isbnMatch ? 200 : 0) + (title === full ? 100 : 0) +
+      (titleMatch ? 60 : 0) + (allWords ? 30 : 0) +
+      (authorMatch ? 40 : 0) + (book.cover ? 5 : 0);
+    return {book, valid, score};
+  }).filter(x => x.valid).sort((a,b) => b.score - a.score);
+  scored.forEach(x => results.append(bookCard(x.book, false)));
+  msg.textContent = scored.length
+    ? scored.length + ' matching books found. Tap Collect 💕'
+    : isISBN
+      ? 'No ISBN match in these databases. The book may not be cataloged there.'
+      : 'No matching books found in these databases. Try title or author.';
+};
+
+$('authOpen').onclick = () => {
+  $('authModal').style.display = 'flex';
+};
+
+render();
+})();
+</script>
+</body></html>
